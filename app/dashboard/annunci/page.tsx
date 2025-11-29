@@ -6,7 +6,6 @@ import PropertyCard from '@/components/annunci/PropertyCard';
 import ProductCard from '@/components/annunci/ProductCard';
 import Loading from '@/components/ui/Loading';
 import Button from '@/components/ui/Button';
-import { Tabs } from 'lucide-react';
 
 export default function AnnunciPage() {
   const [properties, setProperties] = useState<any[]>([]);
