@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 import { isValidEmail, isValidPhone } from '@/lib/utils';
 
 export default function RegisterPage() {
@@ -19,6 +19,7 @@ export default function RegisterPage() {
     confirmPassword: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -62,6 +63,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     setErrors({});
+    setSuccess(false);
 
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -85,12 +87,10 @@ export default function RegisterPage() {
             phone: formData.phone,
             role: 'viewer',
           });
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      setSuccess(true);
+      setLoading(false);
     } catch (err: any) {
       setErrors({ general: 'Errore durante la registrazione' });
       setLoading(false);
@@ -119,96 +119,120 @@ export default function RegisterPage() {
 
         <div className="bg-white rounded-xl shadow-md p-8">
           
-          {errors.general && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-              <p className="text-sm font-medium text-red-800">{errors.general}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleRegister} className="space-y-4">
-            
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Nome"
-                placeholder="Mario"
-                value={formData.nome}
-                onChange={(e) => handleChange('nome', e.target.value)}
-                error={errors.nome}
-                required
-              />
-
-              <Input
-                label="Cognome"
-                placeholder="Rossi"
-                value={formData.cognome}
-                onChange={(e) => handleChange('cognome', e.target.value)}
-                error={errors.cognome}
-                required
-              />
-            </div>
-
-            <Input
-              label="Email"
-              type="email"
-              placeholder="mario.rossi@email.com"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              error={errors.email}
-              required
-            />
-
-            <Input
-              label="Telefono"
-              type="tel"
-              placeholder="333 123 4567"
-              value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              error={errors.phone}
-              helperText="Formato italiano"
-              required
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              error={errors.password}
-              helperText="Minimo 8 caratteri"
-              required
-            />
-
-            <Input
-              label="Conferma Password"
-              type="password"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={(e) => handleChange('confirmPassword', e.target.value)}
-              error={errors.confirmPassword}
-              required
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              fullWidth
-              isLoading={loading}
-            >
-              Registrati
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-text-secondary">
-              Hai già un account?{' '}
-              <Link href="/auth/login" className="text-primary hover:underline font-medium">
-                Accedi
+          {success ? (
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-text-primary mb-3">
+                Account Creato con Successo!
+              </h3>
+              <p className="text-text-secondary mb-2">
+                Controlla la tua email per confermare l'account.
+              </p>
+              <p className="text-sm text-text-secondary mb-6">
+                Ti abbiamo inviato un link di verifica a <strong>{formData.email}</strong>
+              </p>
+              <Link href="/auth/login">
+                <Button variant="primary" fullWidth>
+                  Vai al Login
+                </Button>
               </Link>
-            </p>
-          </div>
+            </div>
+          ) : (
+            <>
+              {errors.general && (
+                <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <p className="text-sm font-medium text-red-800">{errors.general}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleRegister} className="space-y-4">
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Nome"
+                    placeholder="Mario"
+                    value={formData.nome}
+                    onChange={(e) => handleChange('nome', e.target.value)}
+                    error={errors.nome}
+                    required
+                  />
+
+                  <Input
+                    label="Cognome"
+                    placeholder="Rossi"
+                    value={formData.cognome}
+                    onChange={(e) => handleChange('cognome', e.target.value)}
+                    error={errors.cognome}
+                    required
+                  />
+                </div>
+
+                <Input
+                  label="Email"
+                  type="email"
+                  placeholder="mario.rossi@email.com"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  error={errors.email}
+                  required
+                />
+
+                <Input
+                  label="Telefono"
+                  type="tel"
+                  placeholder="333 123 4567"
+                  value={formData.phone}
+                  onChange={(e) => handleChange('phone', e.target.value)}
+                  error={errors.phone}
+                  helperText="Formato italiano"
+                  required
+                />
+
+                <Input
+                  label="Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  error={errors.password}
+                  helperText="Minimo 8 caratteri"
+                  required
+                />
+
+                <Input
+                  label="Conferma Password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                  error={errors.confirmPassword}
+                  required
+                />
+
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  isLoading={loading}
+                >
+                  Registrati
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-text-secondary">
+                  Hai già un account?{' '}
+                  <Link href="/auth/login" className="text-primary hover:underline font-medium">
+                    Accedi
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
