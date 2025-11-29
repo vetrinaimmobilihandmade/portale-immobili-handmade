@@ -63,37 +63,38 @@ export default function RegisterPage() {
     setLoading(true);
     setErrors({});
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-    });
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      });
 
-    if (authError) {
-      setErrors({ general: authError.message });
-      setLoading(false);
-      return;
-    }
-
-    if (authData.user) {
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: authData.user.id,
-          email: formData.email,
-          full_name: `${formData.nome} ${formData.cognome}`,
-          phone: formData.phone,
-          role: 'viewer',
-        });
-
-      if (profileError) {
-        setErrors({ general: 'Errore creazione profilo' });
+      if (authError) {
+        setErrors({ general: authError.message });
         setLoading(false);
         return;
       }
-    }
 
-    router.push('/dashboard');
-    router.refresh();
+      if (authData.user) {
+        await supabase
+          .from('user_profiles')
+          .insert({
+            id: authData.user.id,
+            email: formData.email,
+            full_name: `${formData.nome} ${formData.cognome}`,
+            phone: formData.phone,
+            role: 'viewer',
+          });
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err: any) {
+      setErrors({ general: 'Errore durante la registrazione' });
+      setLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
