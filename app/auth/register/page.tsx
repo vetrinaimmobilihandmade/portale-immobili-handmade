@@ -78,15 +78,22 @@ export default function RegisterPage() {
       }
 
       if (authData.user) {
-        await supabase
+        const { error: profileError } = await supabase
           .from('user_profiles')
           .insert({
             id: authData.user.id,
             email: formData.email,
-            full_name: `${formData.nome} ${formData.cognome}`,
+            display_name: `${formData.nome} ${formData.cognome}`,
             phone: formData.phone,
             role: 'viewer',
           });
+
+        if (profileError) {
+          console.error('Errore inserimento profilo:', profileError);
+          setErrors({ general: 'Errore nella creazione del profilo' });
+          setLoading(false);
+          return;
+        }
       }
 
       setSuccess(true);
