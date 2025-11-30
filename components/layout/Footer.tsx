@@ -122,7 +122,7 @@ export default function Footer() {
               </div>
             </div>
             <a
-              href="https://ko-fi.com/tuousername"
+              href="https://ko-fi.com/alnet"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary-hover text-white rounded-lg transition-colors font-semibold whitespace-nowrap"
