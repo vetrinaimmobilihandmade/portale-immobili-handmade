@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Palette, Plus, Heart, MessageSquare, Settings } from 'lucide-react';
+import { Home, Palette, Plus, Heart, MessageSquare, Settings, LogOut } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import LogoutButton from '@/components/layout/Logout';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -39,13 +40,16 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-neutral-main py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            Benvenuto, {profile?.full_name || 'Utente'}!
-          </h1>
-          <p className="text-text-secondary">
-            Gestisci i tuoi annunci e le tue attività
-          </p>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-text-primary mb-2">
+              Benvenuto, {profile?.full_name || 'Utente'}!
+            </h1>
+            <p className="text-text-secondary">
+              Gestisci i tuoi annunci e le tue attività
+            </p>
+          </div>
+          <LogoutButton />
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
