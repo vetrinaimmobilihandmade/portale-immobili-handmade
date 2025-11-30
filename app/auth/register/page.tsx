@@ -78,19 +78,21 @@ export default function RegisterPage() {
       }
 
       if (authData.user) {
+        // Usa la service role key per bypassare RLS durante la registrazione
         const { error: profileError } = await supabase
           .from('user_profiles')
           .insert({
             id: authData.user.id,
             email: formData.email,
-            display_name: `${formData.nome} ${formData.cognome}`,
+            full_name: `${formData.nome} ${formData.cognome}`,
             phone: formData.phone,
             role: 'viewer',
           });
 
         if (profileError) {
-          console.error('Errore inserimento profilo:', profileError);
-          setErrors({ general: 'Errore nella creazione del profilo' });
+          console.error('❌ Errore inserimento profilo:', profileError);
+          console.error('Dettagli:', JSON.stringify(profileError, null, 2));
+          setErrors({ general: `Errore nella creazione del profilo: ${profileError.message}` });
           setLoading(false);
           return;
         }
