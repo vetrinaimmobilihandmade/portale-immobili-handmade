@@ -32,8 +32,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push('/dashboard');
-    router.refresh();
+    // Usa window.location.href per forzare un reload completo
+    window.location.href = '/dashboard';
   };
 
   return (
