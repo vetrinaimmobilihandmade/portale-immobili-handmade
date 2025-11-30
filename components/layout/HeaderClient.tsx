@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard, MessageSquare } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -17,10 +17,16 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
   const supabase = createClient();
   const router = useRouter();
 
+  // DEBUG: Log per vedere cosa riceve il componente
+  useEffect(() => {
+    console.log('🔍 HeaderClient riceve:');
+    console.log('  - User:', initialUser);
+    console.log('  - Profile:', initialProfile);
+  }, [initialUser, initialProfile]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    window.location.href = '/';
   };
 
   const getInitials = (name: string) => {
