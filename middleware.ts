@@ -1,4 +1,3 @@
-export const runtime = 'nodejs';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -55,47 +54,21 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Route protette che richiedono autenticazione
-  const protectedRoutes = ['/dashboard', '/messages', '/admin'];
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  );
-
-  // Redirect a login se non autenticato
-  if (isProtectedRoute && !user) {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
-  }
-
-  // Redirect a dashboard se già loggato e cerca di accedere a login/register
-  if (user && (request.nextUrl.pathname.startsWith('/auth/login') || 
-                request.nextUrl.pathname.startsWith('/auth/register'))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  // Admin route - controlla ruolo
-  if (request.nextUrl.pathname.startsWith('/admin') && user) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin' && profile?.role !== 'editor') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
+  // Refresh session se esiste
+  await supabase.auth.getUser();
 
   return response;
 }
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/messages/:path*',
-    '/admin/:path*',
-    '/auth/login',
-    '/auth/register',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
