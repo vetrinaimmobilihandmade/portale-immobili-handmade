@@ -157,11 +157,11 @@ export default function NuovoAnnuncioPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-0.5">✓</span>
-                <span><strong>Prezzo chiaro:</strong> Indica sempre il prezzo o specifica "Trattabile"</span>
+                <span><strong>Contatti visibili:</strong> Assicurati che email e telefono siano corretti</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-0.5">✓</span>
-                <span><strong>Rispondi velocemente:</strong> Chi risponde prima ottiene più contatti</span>
+                <span><strong>Rispondi velocemente:</strong> Una risposta rapida aumenta le possibilità di successo</span>
               </li>
             </ul>
           </div>
