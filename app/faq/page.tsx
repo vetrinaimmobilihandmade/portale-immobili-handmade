@@ -73,8 +73,8 @@ const faqs: FAQ[] = [
   },
   {
     category: 'Sicurezza',
-    question: 'Come funziona la messaggistica?',
-    answer: 'La messaggistica è integrata nel portale e ti permette di comunicare in modo sicuro con venditori e acquirenti. Ricevi notifiche via email per ogni nuovo messaggio.',
+    question: 'Come posso contattare un inserzionista?',
+    answer: 'Una volta loggato, puoi vedere i contatti diretti dell\'inserzionista (email, telefono, WhatsApp) nell\'annuncio. Solo gli utenti registrati possono vedere queste informazioni per garantire maggiore sicurezza.',
   },
   {
     category: 'Sicurezza',
