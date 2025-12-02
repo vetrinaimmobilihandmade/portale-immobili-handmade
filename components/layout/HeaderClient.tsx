@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -123,6 +123,19 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                           <LayoutDashboard className="w-5 h-5 text-text-secondary" />
                           <span className="text-text-primary">Dashboard</span>
                         </Link>
+                        
+                        {/* Link Pannello Admin - solo per admin/editor */}
+                        {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
+                          <Link
+                            href="/dashboard/admin"
+                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                            onClick={() => setProfileMenuOpen(false)}
+                          >
+                            <Shield className="w-5 h-5 text-orange-600" />
+                            <span className="text-text-primary">Pannello Admin</span>
+                          </Link>
+                        )}
+                        
                         <Link
                           href="/dashboard/profile"
                           className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
