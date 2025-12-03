@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
           created_at,
           user_id,
           cover_image_url,
-          user_profiles (
+          user_profiles!properties_user_id_fkey (
             full_name,
             email
           )
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
           created_at,
           user_id,
           cover_image_url,
-          user_profiles (
+          user_profiles!products_user_id_fkey (
             full_name,
             email
           )
