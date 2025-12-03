@@ -1,13 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { MapPin, Home, Bed, Bath, Maximize, Calendar, Mail, Phone, User } from 'lucide-react';
+import Link from 'next/link';
+import { MapPin, Home, Bed, Bath, Maximize, Calendar, Mail, Phone, User, MessageCircle, Lock } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 
 export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
+
+  // Verifica se l'utente è loggato
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: property, error } = await supabase
     .from('properties')
@@ -42,6 +46,12 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
   };
 
   const images = property.property_images?.sort((a: any, b: any) => a.display_order - b.display_order) || [];
+
+  // Prepara messaggio WhatsApp
+  const whatsappMessage = encodeURIComponent(
+    `Ciao! Sono interessato a: ${property.title}\nLink: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://portale-immobili-handmade.vercel.app'}/immobili/${params.id}`
+  );
+  const whatsappLink = `https://wa.me/${property.contact_phone?.replace(/\D/g, '')}?text=${whatsappMessage}`;
 
   return (
     <div className="min-h-screen bg-neutral-main py-8">
@@ -189,36 +199,69 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
               </div>
             </div>
 
-            {/* Contatti */}
+            {/* Contatti - Solo se loggato */}
             <div className="bg-primary-lighter rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-text-primary mb-4">Contatta l'inserzionista</h2>
-              <div className="space-y-3">
-                {property.contact_name && (
-                  <div className="flex items-center gap-3 text-text-primary">
-                    <User className="w-5 h-5" />
-                    <span>{property.contact_name}</span>
+              <h2 className="text-xl font-semibold text-text-primary mb-4">
+                Contatta l'inserzionista
+              </h2>
+              
+              {user ? (
+                <>
+                  <div className="space-y-3 mb-4">
+                    {property.contact_name && (
+                      <div className="flex items-center gap-3 text-text-primary">
+                        <User className="w-5 h-5" />
+                        <span>{property.contact_name}</span>
+                      </div>
+                    )}
+                    {property.contact_phone && (
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-5 h-5 text-text-primary" />
+                        <a href={`tel:${property.contact_phone}`} className="text-primary hover:underline font-medium">
+                          {property.contact_phone}
+                        </a>
+                      </div>
+                    )}
+                    {property.contact_email && (
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-5 h-5 text-text-primary" />
+                        <a href={`mailto:${property.contact_email}`} className="text-primary hover:underline font-medium">
+                          {property.contact_email}
+                        </a>
+                      </div>
+                    )}
                   </div>
-                )}
-                {property.contact_phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-text-primary" />
-                    <a href={`tel:${property.contact_phone}`} className="text-primary hover:underline">
-                      {property.contact_phone}
+
+                  {/* Bottone WhatsApp */}
+                  {property.contact_phone && (
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Button variant="primary" fullWidth className="bg-green-600 hover:bg-green-700">
+                        <MessageCircle className="w-5 h-5 mr-2" />
+                        Contatta su WhatsApp
+                      </Button>
                     </a>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-neutral-main rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-text-disabled" />
                   </div>
-                )}
-                {property.contact_email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-text-primary" />
-                    <a href={`mailto:${property.contact_email}`} className="text-primary hover:underline">
-                      {property.contact_email}
-                    </a>
-                  </div>
-                )}
-              </div>
-              <Button variant="primary" fullWidth className="mt-4">
-                Invia Messaggio
-              </Button>
+                  <p className="text-text-secondary mb-4">
+                    Devi essere registrato per vedere i contatti dell'inserzionista
+                  </p>
+                  <Link href={`/auth/login?redirect=/immobili/${params.id}`}>
+                    <Button variant="primary">
+                      Accedi o Registrati
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
