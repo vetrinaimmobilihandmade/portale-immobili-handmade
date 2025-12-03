@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: [sellerEmail],
-      replyTo: buyerEmail,
+      reply_to: buyerEmail,
       subject: `Nuovo contatto per: ${listingTitle}`,
       html: htmlContent,
     });
