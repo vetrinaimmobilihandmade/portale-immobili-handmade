@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -38,9 +38,9 @@ export default function ContactModal({
   const supabase = createClient();
 
   // Carica dati utente al mount
-  useState(() => {
+  useEffect(() => {
     loadUserData();
-  });
+  }, [listingTitle]);
 
   const loadUserData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
