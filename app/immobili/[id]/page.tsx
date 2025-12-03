@@ -1,13 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
-import PropertyDetailClient from './PropertyDetailClient';
+import Image from 'next/image';
+import { MapPin, Home, Bed, Bath, Maximize, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import Badge from '@/components/ui/Badge';
 
 export default async function PropertyDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient();
-
-  // Verifica se l'utente è loggato
-  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: property, error } = await supabase
     .from('properties')
@@ -44,13 +43,178 @@ export default async function PropertyDetailPage({ params }: { params: { id: str
   const images = property.property_images?.sort((a: any, b: any) => a.display_order - b.display_order) || [];
 
   return (
-    <PropertyDetailClient
-      property={property}
-      user={user}
-      typeLabels={typeLabels}
-      categoryLabels={categoryLabels}
-      images={images}
-      formatDate={formatDate}
-    />
+    <div className="min-h-screen bg-neutral-main py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="bg-white rounded-xl overflow-hidden shadow-md">
+          
+          {/* Galleria Immagini */}
+          <div className="relative aspect-[16/9] bg-neutral-main">
+            {property.cover_image_url || images[0] ? (
+              <Image
+                src={property.cover_image_url || images[0]?.full_url}
+                alt={property.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Home className="w-24 h-24 text-text-disabled" />
+              </div>
+            )}
+            
+            <div className="absolute top-4 left-4">
+              <Badge variant="default" className="bg-primary text-white text-base">
+                {typeLabels[property.property_type as keyof typeof typeLabels]}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="p-8">
+            
+            {/* Header */}
+            <div className="mb-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-text-primary mb-2">
+                    {property.title}
+                  </h1>
+                  {(property.municipality_name || property.provinces?.name) && (
+                    <div className="flex items-center gap-2 text-text-secondary">
+                      <MapPin className="w-5 h-5" />
+                      <span>
+                        {property.municipality_name}
+                        {property.provinces?.name && ` (${property.provinces.code})`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                <Calendar className="w-4 h-4" />
+                <span>Pubblicato il {formatDate(property.created_at)}</span>
+              </div>
+            </div>
+
+            {/* Caratteristiche */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 pb-8 border-b border-neutral-border">
+              {property.surface_mq && (
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center">
+                    <Maximize className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-text-secondary">Superficie</div>
+                    <div className="font-semibold text-text-primary">{property.surface_mq} m²</div>
+                  </div>
+                </div>
+              )}
+              
+              {property.rooms && (
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center">
+                    <Home className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-text-secondary">Locali</div>
+                    <div className="font-semibold text-text-primary">{property.rooms}</div>
+                  </div>
+                </div>
+              )}
+              
+              {property.bedrooms && (
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center">
+                    <Bed className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-text-secondary">Camere</div>
+                    <div className="font-semibold text-text-primary">{property.bedrooms}</div>
+                  </div>
+                </div>
+              )}
+              
+              {property.bathrooms && (
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center">
+                    <Bath className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-text-secondary">Bagni</div>
+                    <div className="font-semibold text-text-primary">{property.bathrooms}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Descrizione */}
+            {property.description && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-text-primary mb-4">Descrizione</h2>
+                <p className="text-text-secondary whitespace-pre-line">{property.description}</p>
+              </div>
+            )}
+
+            {/* Dettagli */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-text-primary mb-4">Dettagli</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="flex justify-between py-3 border-b border-neutral-border">
+                  <span className="text-text-secondary">Categoria</span>
+                  <span className="font-medium text-text-primary">
+                    {categoryLabels[property.property_category as keyof typeof categoryLabels]}
+                  </span>
+                </div>
+                {property.floor && (
+                  <div className="flex justify-between py-3 border-b border-neutral-border">
+                    <span className="text-text-secondary">Piano</span>
+                    <span className="font-medium text-text-primary">{property.floor}</span>
+                  </div>
+                )}
+                {property.year_built && (
+                  <div className="flex justify-between py-3 border-b border-neutral-border">
+                    <span className="text-text-secondary">Anno costruzione</span>
+                    <span className="font-medium text-text-primary">{property.year_built}</span>
+                  </div>
+                )}
+                {property.energy_class && (
+                  <div className="flex justify-between py-3 border-b border-neutral-border">
+                    <span className="text-text-secondary">Classe energetica</span>
+                    <span className="font-medium text-text-primary">{property.energy_class}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Contatti - TEMPORANEO: mostriamo tutto per ora */}
+            <div className="bg-primary-lighter rounded-xl p-6">
+              <h2 className="text-xl font-semibold text-text-primary mb-4">
+                Informazioni Contatto
+              </h2>
+              <p className="text-text-secondary mb-4">
+                Sistema di contatto in sviluppo. Per ora i contatti sono visibili qui.
+              </p>
+              {property.contact_name && (
+                <p className="text-text-primary mb-2">
+                  <strong>Nome:</strong> {property.contact_name}
+                </p>
+              )}
+              {property.contact_email && (
+                <p className="text-text-primary mb-2">
+                  <strong>Email:</strong> {property.contact_email}
+                </p>
+              )}
+              {property.contact_phone && (
+                <p className="text-text-primary">
+                  <strong>Telefono:</strong> {property.contact_phone}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
