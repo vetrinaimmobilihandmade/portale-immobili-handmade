@@ -125,21 +125,22 @@ export default function NuovoImmobilePage() {
 
       // Inserisci immagini nella tabella property_images
       if (imageUrls.length > 0 && property) {
-        const imageRecords = imageUrls.map((url, index) => ({
-          property_id: property.id,
-          image_url: url,
-          display_order: index,
-          is_cover: index === 0,
-        }));
+  const imageRecords = imageUrls.map((url, index) => ({
+    property_id: property.id,
+    thumbnail_url: url,  // ✅ CAMPO CORRETTO
+    full_url: url,       // ✅ CAMPO CORRETTO
+    display_order: index,
+    file_size: null,     // ✅ CAMPO OPZIONALE
+  }));
 
-        const { error: imagesError } = await supabase
-          .from('property_images')
-          .insert(imageRecords);
+  const { error: imagesError } = await supabase
+    .from('property_images')
+    .insert(imageRecords);
 
-        if (imagesError) {
-          console.error('Error inserting images:', imagesError);
-        }
-      }
+  if (imagesError) {
+    console.error('Error inserting images:', imagesError);
+  }
+}
 
       setSuccess(true);
       
