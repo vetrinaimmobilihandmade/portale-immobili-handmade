@@ -144,7 +144,6 @@ export default function AdminEditListingPage() {
     setError('');
 
     try {
-      const table = listingType === 'property' ? 'properties' : 'products';
       const imagesTable = listingType === 'property' ? 'property_images' : 'product_images';
       const idField = listingType === 'property' ? 'property_id' : 'product_id';
 
@@ -155,10 +154,21 @@ export default function AdminEditListingPage() {
         updated_at: new Date().toISOString(),
       };
 
-      const { error: updateError } = await supabase
-        .from(table)
-        .update(updateData as any)
-        .eq('id', listingId);
+      let updateError = null;
+
+      if (listingType === 'property') {
+        const { error } = await supabase
+          .from('properties')
+          .update(updateData)
+          .eq('id', listingId);
+        updateError = error;
+      } else {
+        const { error } = await supabase
+          .from('products')
+          .update(updateData)
+          .eq('id', listingId);
+        updateError = error;
+      }
 
       if (updateError) throw updateError;
 
