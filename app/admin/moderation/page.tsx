@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Shield, Home, Palette, Check, X, Eye, AlertCircle, RotateCcw, Archive, Trash2, MoreVertical } from 'lucide-react';
+import { Shield, Home, Palette, Check, X, Eye, AlertCircle, RotateCcw, Archive, Trash2, MoreVertical, Edit } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { formatDate } from '@/lib/utils';
