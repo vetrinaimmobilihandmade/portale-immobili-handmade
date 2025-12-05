@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Shield, Home, Palette, Check, X, Eye, AlertCircle, RotateCcw, Archive, Trash2, Edit, MoreVertical } from 'lucide-react';
+import { Shield, Home, Palette, Check, X, Eye, AlertCircle, RotateCcw, Archive, Trash2, MoreVertical } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { formatDate } from '@/lib/utils';
@@ -38,6 +38,15 @@ export default function ModerationPage() {
     rejected: 0,
     archived: 0,
   });
+
+  // 🔍 DEBUG: Log per capire cosa sta succedendo
+  useEffect(() => {
+    console.log('🔍 Admin Moderation Debug:');
+    console.log('  - Filter Status:', filterStatus);
+    console.log('  - Filter Type:', filterType);
+    console.log('  - Properties:', properties.length);
+    console.log('  - Products:', products.length);
+  }, [filterStatus, filterType, properties, products]);
 
   useEffect(() => {
     checkPermissions();
@@ -79,23 +88,31 @@ export default function ModerationPage() {
     const newStats: any = {};
 
     for (const status of statuses) {
-      const { count: propCount } = await supabase
+      const { count: propCount, error: propError } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .eq('status', status);
 
-      const { count: prodCount } = await supabase
+      const { count: prodCount, error: prodError } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true })
         .eq('status', status);
 
+      // 🔍 DEBUG: Log errori
+      if (propError) console.error('❌ Errore count properties:', propError);
+      if (prodError) console.error('❌ Errore count products:', prodError);
+
       newStats[status] = (propCount || 0) + (prodCount || 0);
     }
 
+    console.log('📊 Stats:', newStats);
     setStats(newStats);
   };
 
   const loadListings = async () => {
+    console.log('🔄 Loading listings...');
+    
+    // 📦 CARICA IMMOBILI
     if (filterType === 'all' || filterType === 'property') {
       let propertyQuery = supabase
         .from('properties')
@@ -109,12 +126,19 @@ export default function ModerationPage() {
         propertyQuery = propertyQuery.eq('status', filterStatus);
       }
 
-      const { data: propertiesData } = await propertyQuery;
-      setProperties(propertiesData || []);
+      const { data: propertiesData, error: propError } = await propertyQuery;
+      
+      if (propError) {
+        console.error('❌ Errore caricamento properties:', propError);
+      } else {
+        console.log('✅ Properties caricate:', propertiesData?.length || 0);
+        setProperties(propertiesData || []);
+      }
     } else {
       setProperties([]);
     }
 
+    // 🎨 CARICA PRODOTTI
     if (filterType === 'all' || filterType === 'product') {
       let productQuery = supabase
         .from('products')
@@ -129,8 +153,16 @@ export default function ModerationPage() {
         productQuery = productQuery.eq('status', filterStatus);
       }
 
-      const { data: productsData } = await productQuery;
-      setProducts(productsData || []);
+      const { data: productsData, error: prodError } = await productQuery;
+      
+      if (prodError) {
+        console.error('❌ Errore caricamento products:', prodError);
+        console.error('Dettagli errore:', JSON.stringify(prodError, null, 2));
+      } else {
+        console.log('✅ Products caricati:', productsData?.length || 0);
+        console.log('📦 Dati prodotti:', productsData);
+        setProducts(productsData || []);
+      }
     } else {
       setProducts([]);
     }
@@ -565,6 +597,13 @@ export default function ModerationPage() {
             <p className="text-text-secondary">
               Gestisci e modera tutti gli annunci della piattaforma
             </p>
+            
+            {/* 🔍 DEBUG INFO */}
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-mono text-blue-800">
+                🔍 Debug: Properties: {properties.length} | Products: {products.length} | Total: {allListings.length}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">
@@ -631,6 +670,7 @@ export default function ModerationPage() {
         </div>
       </div>
 
+      {/* MODALS - Unchanged */}
       {rejectModalOpen && actionItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
