@@ -205,7 +205,7 @@ export default function AnnunciPage() {
               </div>
 
               {/* Menu Azioni */}
-              <div className="relative">
+              <div className="relative z-10">
                 <button
                   onClick={() => setOpenMenu(openMenu === item.id ? null : item.id)}
                   className="p-2 hover:bg-neutral-main rounded-lg transition-colors"
@@ -216,10 +216,10 @@ export default function AnnunciPage() {
                 {openMenu === item.id && (
                   <>
                     <div
-                      className="fixed inset-0 z-10"
+                      className="fixed inset-0 z-40"
                       onClick={() => setOpenMenu(null)}
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-border z-20 py-1">
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-border z-50 py-1">
                       {item.status === 'approved' && (
                         <Link
                           href={detailUrl}
