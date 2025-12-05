@@ -12,7 +12,6 @@ import { formatDate } from '@/lib/utils';
 
 type ListingStatus = 'all' | 'pending' | 'approved' | 'rejected' | 'archived';
 type ListingType = 'all' | 'property' | 'product';
-type ActionType = 'approve' | 'reject' | 'restore' | 'archive' | 'delete';
 
 export default function ModerationPage() {
   const router = useRouter();
@@ -28,13 +27,11 @@ export default function ModerationPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   
-  // Modal states
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [actionItem, setActionItem] = useState<{ id: string; type: 'property' | 'product'; title: string } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
 
-  // Stats
   const [stats, setStats] = useState({
     pending: 0,
     approved: 0,
@@ -61,7 +58,7 @@ export default function ModerationPage() {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profile }: any = await supabase
       .from('user_profiles')
       .select('role')
       .eq('id', currentUser.id)
@@ -99,7 +96,6 @@ export default function ModerationPage() {
   };
 
   const loadListings = async () => {
-    // Carica immobili
     if (filterType === 'all' || filterType === 'property') {
       let propertyQuery = supabase
         .from('properties')
@@ -119,7 +115,6 @@ export default function ModerationPage() {
       setProperties([]);
     }
 
-    // Carica prodotti
     if (filterType === 'all' || filterType === 'product') {
       let productQuery = supabase
         .from('products')
@@ -141,12 +136,11 @@ export default function ModerationPage() {
     }
   };
 
-  const handleAction = async (action: ActionType, id: string, type: 'property' | 'product') => {
+  const handleAction = async (action: string, id: string, type: 'property' | 'product') => {
     if (!user) return;
     
     setProcessingId(id);
     setOpenMenu(null);
-    const table = type === 'property' ? 'properties' : 'products';
     
     let updateData: any = {};
 
@@ -177,10 +171,21 @@ export default function ModerationPage() {
         break;
     }
 
-    const { error } = await supabase
-      .from(table)
-      .update(updateData)
-      .eq('id', id);
+    let error = null;
+    
+    if (type === 'property') {
+      const result = await supabase
+        .from('properties')
+        .update(updateData)
+        .eq('id', id);
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from('products')
+        .update(updateData)
+        .eq('id', id);
+      error = result.error;
+    }
 
     if (error) {
       alert('Errore durante l\'operazione');
@@ -207,17 +212,32 @@ export default function ModerationPage() {
     }
 
     setProcessingId(actionItem.id);
-    const table = actionItem.type === 'property' ? 'properties' : 'products';
     
-    const { error } = await supabase
-      .from(table)
-      .update({
-        status: 'rejected',
-        rejected_reason: rejectReason,
-        approved_by: user.id,
-        approved_at: new Date().toISOString(),
-      })
-      .eq('id', actionItem.id);
+    let error = null;
+    
+    if (actionItem.type === 'property') {
+      const result = await supabase
+        .from('properties')
+        .update({
+          status: 'rejected',
+          rejected_reason: rejectReason,
+          approved_by: user.id,
+          approved_at: new Date().toISOString(),
+        })
+        .eq('id', actionItem.id);
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from('products')
+        .update({
+          status: 'rejected',
+          rejected_reason: rejectReason,
+          approved_by: user.id,
+          approved_at: new Date().toISOString(),
+        })
+        .eq('id', actionItem.id);
+      error = result.error;
+    }
 
     if (error) {
       alert('Errore durante il rifiuto');
@@ -242,12 +262,22 @@ export default function ModerationPage() {
     if (!actionItem) return;
 
     setProcessingId(actionItem.id);
-    const table = actionItem.type === 'property' ? 'properties' : 'products';
     
-    const { error } = await supabase
-      .from(table)
-      .delete()
-      .eq('id', actionItem.id);
+    let error = null;
+    
+    if (actionItem.type === 'property') {
+      const result = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', actionItem.id);
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from('products')
+        .delete()
+        .eq('id', actionItem.id);
+      error = result.error;
+    }
 
     if (error) {
       alert('Errore durante l\'eliminazione');
@@ -303,7 +333,6 @@ export default function ModerationPage() {
       <div className="bg-white rounded-lg border border-neutral-border">
         <div className="flex gap-4 p-6">
           
-          {/* Immagine */}
           <div className="relative w-40 h-40 flex-shrink-0 bg-neutral-main rounded-lg overflow-hidden">
             {item.cover_image_url ? (
               <Image
@@ -319,7 +348,6 @@ export default function ModerationPage() {
             )}
           </div>
 
-          {/* Contenuto */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex-1">
@@ -342,7 +370,6 @@ export default function ModerationPage() {
               {item.description}
             </p>
 
-            {/* Info Inserzionista */}
             <div className="bg-neutral-main rounded-lg p-3 mb-4">
               <p className="text-xs text-text-secondary mb-1">Pubblicato da:</p>
               <div className="flex items-center justify-between">
@@ -357,7 +384,6 @@ export default function ModerationPage() {
               </div>
             </div>
 
-            {/* Motivo rifiuto */}
             {item.status === 'rejected' && item.rejected_reason && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-800">
@@ -366,10 +392,8 @@ export default function ModerationPage() {
               </div>
             )}
 
-            {/* Azioni */}
             <div className="flex items-center gap-3">
               
-              {/* Azioni Quick - Status Pending */}
               {item.status === 'pending' && (
                 <>
                   <Button
@@ -394,7 +418,6 @@ export default function ModerationPage() {
                 </>
               )}
 
-              {/* Azioni Quick - Altri Status */}
               {item.status !== 'pending' && (
                 <Button
                   variant="primary"
@@ -408,7 +431,6 @@ export default function ModerationPage() {
                 </Button>
               )}
 
-              {/* Visualizza */}
               {item.status === 'approved' && (
                 <Link href={detailUrl} target="_blank">
                   <Button variant="ghost" disabled={!!processingId}>
@@ -417,7 +439,6 @@ export default function ModerationPage() {
                 </Link>
               )}
 
-              {/* Menu Azioni */}
               <div className="relative">
                 <button
                   onClick={() => setOpenMenu(openMenu === item.id ? null : item.id)}
@@ -439,16 +460,6 @@ export default function ModerationPage() {
                       style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
                     >
                       
-                      {/* Modifica */}
-                      <Link
-                        href={`/admin/annunci/${item.id}/edit?type=${type}`}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-neutral-main transition-colors w-full"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Modifica
-                      </Link>
-
-                      {/* Visualizza (se approved) */}
                       {item.status === 'approved' && (
                         <Link
                           href={detailUrl}
@@ -462,7 +473,6 @@ export default function ModerationPage() {
 
                       <div className="border-t border-neutral-border my-1"></div>
 
-                      {/* Approva (se non approved) */}
                       {item.status !== 'approved' && (
                         <button
                           onClick={() => handleAction('approve', item.id, type)}
@@ -473,7 +483,6 @@ export default function ModerationPage() {
                         </button>
                       )}
 
-                      {/* Rifiuta (se non rejected) */}
                       {item.status !== 'rejected' && (
                         <button
                           onClick={() => openRejectModal(item.id, type, item.title)}
@@ -484,7 +493,6 @@ export default function ModerationPage() {
                         </button>
                       )}
 
-                      {/* Ripristina (se rejected o archived) */}
                       {(item.status === 'rejected' || item.status === 'archived') && (
                         <button
                           onClick={() => handleAction('restore', item.id, type)}
@@ -495,7 +503,6 @@ export default function ModerationPage() {
                         </button>
                       )}
 
-                      {/* Archivia (se non archived) */}
                       {item.status !== 'archived' && (
                         <button
                           onClick={() => handleAction('archive', item.id, type)}
@@ -508,7 +515,6 @@ export default function ModerationPage() {
 
                       <div className="border-t border-neutral-border my-1"></div>
 
-                      {/* Elimina */}
                       <button
                         onClick={() => openDeleteModal(item.id, type, item.title)}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -549,7 +555,6 @@ export default function ModerationPage() {
       <div className="min-h-screen bg-neutral-main py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <Shield className="w-8 h-8 text-primary" />
@@ -562,14 +567,13 @@ export default function ModerationPage() {
             </p>
           </div>
 
-          {/* Tabs Status */}
           <div className="flex flex-wrap gap-2 mb-6">
             {[
               { value: 'all', label: 'Tutti', count: stats.pending + stats.approved + stats.rejected + stats.archived },
-              { value: 'pending', label: 'In Attesa', count: stats.pending, color: 'yellow' },
-              { value: 'approved', label: 'Approvati', count: stats.approved, color: 'green' },
-              { value: 'rejected', label: 'Rifiutati', count: stats.rejected, color: 'red' },
-              { value: 'archived', label: 'Archiviati', count: stats.archived, color: 'gray' },
+              { value: 'pending', label: 'In Attesa', count: stats.pending },
+              { value: 'approved', label: 'Approvati', count: stats.approved },
+              { value: 'rejected', label: 'Rifiutati', count: stats.rejected },
+              { value: 'archived', label: 'Archiviati', count: stats.archived },
             ].map((tab) => (
               <button
                 key={tab.value}
@@ -585,7 +589,6 @@ export default function ModerationPage() {
             ))}
           </div>
 
-          {/* Filtro Tipo */}
           <div className="bg-white rounded-lg border border-neutral-border p-4 mb-6">
             <label className="block text-sm font-medium text-text-primary mb-2">
               Filtra per Tipo
@@ -601,7 +604,6 @@ export default function ModerationPage() {
             </select>
           </div>
 
-          {/* Lista Annunci */}
           {allListings.length === 0 ? (
             <div className="bg-white rounded-xl border border-neutral-border p-12 text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -629,7 +631,6 @@ export default function ModerationPage() {
         </div>
       </div>
 
-      {/* Modal Rifiuto */}
       {rejectModalOpen && actionItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -648,7 +649,7 @@ export default function ModerationPage() {
             </div>
 
             <textarea
-              placeholder="Specifica il motivo del rifiuto (es: immagini non chiare, descrizione incompleta, contenuto inappropriato...)"
+              placeholder="Specifica il motivo del rifiuto..."
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={4}
@@ -682,7 +683,6 @@ export default function ModerationPage() {
         </div>
       )}
 
-      {/* Modal Elimina */}
       {deleteModalOpen && actionItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -710,7 +710,7 @@ export default function ModerationPage() {
             </div>
 
             <p className="text-sm text-text-secondary mb-6">
-              L'annuncio e tutte le sue immagini saranno eliminate definitivamente. Questa operazione non può essere annullata.
+              L'annuncio sarà eliminato definitivamente.
             </p>
 
             <div className="flex gap-3">
