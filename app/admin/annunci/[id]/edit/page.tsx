@@ -55,7 +55,7 @@ export default function AdminEditListingPage() {
       .from('user_profiles')
       .select('role')
       .eq('id', currentUser.id)
-      .single();
+      .single() as { data: { role: string } | null };
 
     const canMod = profile?.role === 'admin' || profile?.role === 'editor';
     setCanEdit(canMod);
