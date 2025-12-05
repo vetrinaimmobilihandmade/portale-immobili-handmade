@@ -149,7 +149,7 @@ export default function AdminEditListingPage() {
       const idField = listingType === 'property' ? 'property_id' : 'product_id';
 
       // Update annuncio
-      const updateData = {
+      const updateData: Record<string, any> = {
         ...formData,
         cover_image_url: imageUrls[0] || null,
         updated_at: new Date().toISOString(),
@@ -157,7 +157,7 @@ export default function AdminEditListingPage() {
 
       const { error: updateError } = await supabase
         .from(table)
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', listingId);
 
       if (updateError) throw updateError;
