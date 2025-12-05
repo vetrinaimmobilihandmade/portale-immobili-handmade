@@ -23,7 +23,7 @@ export default function ModerationPage() {
   const [properties, setProperties] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<ListingStatus>('pending');
+  const [filterStatus, setFilterStatus] = useState<ListingStatus>('all');
   const [filterType, setFilterType] = useState<ListingType>('all');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -554,7 +554,7 @@ export default function ModerationPage() {
             <div className="flex items-center gap-3 mb-2">
               <Shield className="w-8 h-8 text-primary" />
               <h1 className="text-3xl font-bold text-text-primary">
-                Moderazione Annunci
+                Pannello Moderazione
               </h1>
             </div>
             <p className="text-text-secondary">
