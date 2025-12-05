@@ -110,63 +110,61 @@ export default function ModerationPage() {
   };
 
   const loadListings = async () => {
-    console.log('🔄 Loading listings...');
+  console.log('🔄 Loading listings...');
+  
+  // 📦 CARICA IMMOBILI - ✅ CORRETTO
+  if (filterType === 'all' || filterType === 'property') {
+    let propertyQuery = supabase
+      .from('properties')
+      .select(`
+        *,
+        user_profiles!properties_user_id_fkey (full_name, email)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (filterStatus !== 'all') {
+      propertyQuery = propertyQuery.eq('status', filterStatus);
+    }
+
+    const { data: propertiesData, error: propError } = await propertyQuery;
     
-    // 📦 CARICA IMMOBILI
-    if (filterType === 'all' || filterType === 'property') {
-      let propertyQuery = supabase
-        .from('properties')
-        .select(`
-          *,
-          user_profiles (full_name, email)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (filterStatus !== 'all') {
-        propertyQuery = propertyQuery.eq('status', filterStatus);
-      }
-
-      const { data: propertiesData, error: propError } = await propertyQuery;
-      
-      if (propError) {
-        console.error('❌ Errore caricamento properties:', propError);
-      } else {
-        console.log('✅ Properties caricate:', propertiesData?.length || 0);
-        setProperties(propertiesData || []);
-      }
+    if (propError) {
+      console.error('❌ Errore caricamento properties:', propError);
     } else {
-      setProperties([]);
+      console.log('✅ Properties caricate:', propertiesData?.length || 0);
+      setProperties(propertiesData || []);
+    }
+  } else {
+    setProperties([]);
+  }
+
+  // 🎨 CARICA PRODOTTI - ✅ CORRETTO
+  if (filterType === 'all' || filterType === 'product') {
+    let productQuery = supabase
+      .from('products')
+      .select(`
+        *,
+        user_profiles!products_user_id_fkey (full_name, email),
+        product_categories (name)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (filterStatus !== 'all') {
+      productQuery = productQuery.eq('status', filterStatus);
     }
 
-    // 🎨 CARICA PRODOTTI
-    if (filterType === 'all' || filterType === 'product') {
-      let productQuery = supabase
-        .from('products')
-        .select(`
-          *,
-          user_profiles (full_name, email),
-          product_categories (name)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (filterStatus !== 'all') {
-        productQuery = productQuery.eq('status', filterStatus);
-      }
-
-      const { data: productsData, error: prodError } = await productQuery;
-      
-      if (prodError) {
-        console.error('❌ Errore caricamento products:', prodError);
-        console.error('Dettagli errore:', JSON.stringify(prodError, null, 2));
-      } else {
-        console.log('✅ Products caricati:', productsData?.length || 0);
-        console.log('📦 Dati prodotti:', productsData);
-        setProducts(productsData || []);
-      }
+    const { data: productsData, error: prodError } = await productQuery;
+    
+    if (prodError) {
+      console.error('❌ Errore caricamento products:', prodError);
     } else {
-      setProducts([]);
+      console.log('✅ Products caricati:', productsData?.length || 0);
+      setProducts(productsData || []);
     }
-  };
+  } else {
+    setProducts([]);
+  }
+};
 
   const handleAction = async (action: string, id: string, type: 'property' | 'product') => {
     if (!user) return;
