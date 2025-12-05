@@ -165,7 +165,6 @@ export default function ModerationPage() {
     setProducts([]);
   }
 };
-
   const handleAction = async (action: string, id: string, type: 'property' | 'product') => {
     if (!user) return;
     
