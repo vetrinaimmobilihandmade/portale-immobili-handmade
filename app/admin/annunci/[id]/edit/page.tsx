@@ -100,7 +100,7 @@ export default function AdminEditListingPage() {
       .from(imagesTable)
       .select('full_url, display_order')
       .eq(listingType === 'property' ? 'property_id' : 'product_id', listingId)
-      .order('display_order');
+      .order('display_order') as { data: Array<{ full_url: string; display_order: number }> | null };
 
     if (images) {
       setImageUrls(images.map(img => img.full_url));
