@@ -126,15 +126,15 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                         
                         {/* Link Pannello Admin - solo per admin/editor */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
-                          <Link
-                            href="/dashboard/admin"
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
-                            onClick={() => setProfileMenuOpen(false)}
-                          >
-                            <Shield className="w-5 h-5 text-orange-600" />
-                            <span className="text-text-primary">Pannello Admin</span>
-                          </Link>
-                        )}
+  <Link
+    href="/admin/moderation"  // ✅ NUOVO LINK
+    className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+    onClick={() => setProfileMenuOpen(false)}
+  >
+    <Shield className="w-5 h-5 text-orange-600" />
+    <span className="text-text-primary">Pannello Admin</span>
+  </Link>
+)}
                         
                         <Link
                           href="/dashboard/profile"
