@@ -502,15 +502,21 @@ export default function ModerationPage() {
 
                       <div className="border-t border-neutral-border my-1"></div>
 
-                      {item.status !== 'approved' && (
-                        <button
-                          onClick={() => handleAction('approve', item.id, type)}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
-                        >
-                          <Check className="w-4 h-4" />
-                          Approva
-                        </button>
-                      )}
+<Link
+  href={`/admin/moderation/edit/${type}/${item.id}`}
+  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-neutral-main transition-colors"
+>
+  <Edit className="w-4 h-4" />
+  Modifica
+</Link>
+
+<button
+  onClick={() => openDeleteModal(item.id, type, item.title)}
+  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+>
+  <Trash2 className="w-4 h-4" />
+  Elimina
+</button>
 
                       {item.status !== 'rejected' && (
                         <button
