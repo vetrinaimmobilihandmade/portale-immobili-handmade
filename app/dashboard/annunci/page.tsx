@@ -150,14 +150,14 @@ export default function AnnunciPage() {
     }
   };
 
-  const ListingCard = ({ item, type }: { item: any; type: 'property' | 'product' }) => {
+      const ListingCard = ({ item, type }: { item: any; type: 'property' | 'product' }) => {
     const isProperty = type === 'property';
     const detailUrl = isProperty ? `/immobili/${item.id}` : `/handmade/${item.id}`;
     const icon = isProperty ? Home : Palette;
     const Icon = icon;
 
     return (
-      <div className="bg-white rounded-lg border border-neutral-border overflow-hidden hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-lg border border-neutral-border hover:shadow-md transition-shadow">
         <div className="flex gap-4 p-4">
           
           {/* Immagine */}
@@ -205,21 +205,26 @@ export default function AnnunciPage() {
               </div>
 
               {/* Menu Azioni */}
-              <div className="relative z-10">
+              <div className="relative">
                 <button
                   onClick={() => setOpenMenu(openMenu === item.id ? null : item.id)}
                   className="p-2 hover:bg-neutral-main rounded-lg transition-colors"
+                  aria-label="Menu azioni"
                 >
                   <MoreVertical className="w-5 h-5 text-text-secondary" />
                 </button>
 
                 {openMenu === item.id && (
                   <>
+                    {/* Backdrop */}
                     <div
-                      className="fixed inset-0 z-40"
+                      className="fixed inset-0 z-[100]"
                       onClick={() => setOpenMenu(null)}
                     />
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-border z-50 py-1">
+                    {/* Menu Dropdown */}
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-xl border border-neutral-border z-[101] py-1"
+                      style={{ boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
+                    >
                       {item.status === 'approved' && (
                         <Link
                           href={detailUrl}
