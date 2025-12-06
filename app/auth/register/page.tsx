@@ -26,78 +26,60 @@ export default function RegisterPage() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.nome.trim()) newErrors.nome = 'Nome richiesto';
     if (!formData.cognome.trim()) newErrors.cognome = 'Cognome richiesto';
-    
     if (!formData.email.trim()) {
       newErrors.email = 'Email richiesta';
     } else if (!isValidEmail(formData.email)) {
       newErrors.email = 'Email non valida';
     }
-
     if (!formData.phone.trim()) {
       newErrors.phone = 'Telefono richiesto';
     } else if (!isValidPhone(formData.phone)) {
       newErrors.phone = 'Numero non valido';
     }
-
     if (!formData.password) {
       newErrors.password = 'Password richiesta';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Minimo 8 caratteri';
     }
-
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Le password non corrispondono';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validate()) return;
-
     setLoading(true);
     setErrors({});
     setSuccess(false);
-
     try {
-      const authResponse = await supabase.auth.signUp({
+      const res1 = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
       });
-
-      if (authResponse.error) {
-        setErrors({ general: authResponse.error.message });
+      if (res1.error) {
+        setErrors({ general: res1.error.message });
         setLoading(false);
         return;
       }
-
-      if (authResponse.data.user) {
-        const fullName = formData.nome + ' ' + formData.cognome;
-        
-        const profileResponse = await supabase
-          .from('user_profiles')
-          .insert({
-            id: authResponse.data.user.id,
-            email: formData.email,
-            full_name: fullName,
-            phone: formData.phone,
-            role: 'viewer',
-          });
-
-        if (profileResponse.error) {
-          console.error('Errore inserimento profilo:', profileResponse.error);
-          setErrors({ general: 'Errore nella creazione del profilo: ' + profileResponse.error.message });
+      if (res1.data.user) {
+        const res2 = await supabase.from('user_profiles').insert({
+          id: res1.data.user.id,
+          email: formData.email,
+          full_name: formData.nome + ' ' + formData.cognome,
+          phone: formData.phone,
+          role: 'viewer',
+        });
+        if (res2.error) {
+          setErrors({ general: 'Errore creazione profilo' });
           setLoading(false);
           return;
         }
       }
-
       setSuccess(true);
       setLoading(false);
     } catch (err) {
@@ -107,10 +89,7 @@ export default function RegisterPage() {
   };
 
   const handleChange = (field: string, value: string) => {
-    const newFormData = { ...formData };
-    newFormData[field as keyof typeof formData] = value;
-    setFormData(newFormData);
-    
+    setFormData({ ...formData, [field]: value });
     if (errors[field]) {
       const newErrors = { ...errors };
       delete newErrors[field];
@@ -119,39 +98,22 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-main flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-neutral-main flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
-        
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            Registrati
-          </h1>
-          <p className="text-text-secondary">
-            Crea il tuo account gratuito
-          </p>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">Registrati</h1>
+          <p className="text-text-secondary">Crea il tuo account gratuito</p>
         </div>
-
         <div className="bg-white rounded-xl shadow-md p-8">
-          
           {success ? (
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-10 h-10 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-text-primary mb-3">
-                Account Creato con Successo!
-              </h3>
-              <p className="text-text-secondary mb-2">
-                Controlla la tua email per confermare l&apos;account.
-              </p>
-              <p className="text-sm text-text-secondary mb-6">
-                Ti abbiamo inviato un link di verifica a <strong>{formData.email}</strong>
-              </p>
-              <Link href="/auth/login">
-                <Button variant="primary" fullWidth>
-                  Vai al Login
-                </Button>
-              </Link>
+              <h3 className="text-xl font-semibold text-text-primary mb-3">Account Creato con Successo!</h3>
+              <p className="text-text-secondary mb-2">Controlla la tua email per confermare l&apos;account.</p>
+              <p className="text-sm text-text-secondary mb-6">Ti abbiamo inviato un link di verifica a <strong>{formData.email}</strong></p>
+              <Link href="/auth/login"><Button variant="primary" fullWidth>Vai al Login</Button></Link>
             </div>
           ) : (
             <>
@@ -161,152 +123,49 @@ export default function RegisterPage() {
                     <Shield className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-text-primary mb-1 text-sm">
-                      💡 Proteggi la tua Privacy
-                    </h3>
-                    <p className="text-xs text-text-secondary mb-3">
-                      Vuoi registrarti senza rivelare la tua email reale? Usa un servizio di <strong>Email Forwarding Anonimo</strong>!
-                    </p>
+                    <h3 className="font-semibold text-text-primary mb-1 text-sm">💡 Proteggi la tua Privacy</h3>
+                    <p className="text-xs text-text-secondary mb-3">Vuoi registrarti senza rivelare la tua email reale? Usa un servizio di <strong>Email Forwarding Anonimo</strong>!</p>
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-2 mb-3">
-                  
-                    href="https://simplelogin.io"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
-                  >
+                  <a href="https://simplelogin.io" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group">
                     <span className="font-medium text-primary group-hover:underline">SimpleLogin</span>
                     <ExternalLink className="w-3 h-3 text-text-secondary" />
                   </a>
-
-                  
-                    href="https://anonaddy.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
-                  >
+                  <a href="https://anonaddy.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group">
                     <span className="font-medium text-primary group-hover:underline">AnonAddy</span>
                     <ExternalLink className="w-3 h-3 text-text-secondary" />
                   </a>
-
-                  
-                    href="https://relay.firefox.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
-                  >
+                  <a href="https://relay.firefox.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group">
                     <span className="font-medium text-primary group-hover:underline">Firefox Relay</span>
                     <ExternalLink className="w-3 h-3 text-text-secondary" />
                   </a>
-
-                  
-                    href="https://duckduckgo.com/email"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
-                  >
+                  <a href="https://duckduckgo.com/email" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group">
                     <span className="font-medium text-primary group-hover:underline">DuckDuckGo</span>
                     <ExternalLink className="w-3 h-3 text-text-secondary" />
                   </a>
                 </div>
-
-                <p className="text-xs text-text-secondary">
-                  <strong>Come funziona:</strong> Crei un alias email che inoltra i messaggi alla tua vera email mantenendola nascosta.
-                </p>
+                <p className="text-xs text-text-secondary"><strong>Come funziona:</strong> Crei un alias email che inoltra i messaggi alla tua vera email mantenendola nascosta.</p>
               </div>
-
               {errors.general && (
                 <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                   <p className="text-sm font-medium text-red-800">{errors.general}</p>
                 </div>
               )}
-
               <form onSubmit={handleRegister} className="space-y-4">
-                
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Nome"
-                    placeholder="Mario"
-                    value={formData.nome}
-                    onChange={(e) => handleChange('nome', e.target.value)}
-                    error={errors.nome}
-                    required
-                  />
-
-                  <Input
-                    label="Cognome"
-                    placeholder="Rossi"
-                    value={formData.cognome}
-                    onChange={(e) => handleChange('cognome', e.target.value)}
-                    error={errors.cognome}
-                    required
-                  />
+                  <Input label="Nome" placeholder="Mario" value={formData.nome} onChange={(e) => handleChange('nome', e.target.value)} error={errors.nome} required />
+                  <Input label="Cognome" placeholder="Rossi" value={formData.cognome} onChange={(e) => handleChange('cognome', e.target.value)} error={errors.cognome} required />
                 </div>
-
-                <Input
-                  label="Email"
-                  type="email"
-                  placeholder="mario.rossi@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  error={errors.email}
-                  helperText="Usa una email anonima per maggiore privacy"
-                  required
-                />
-
-                <Input
-                  label="Telefono"
-                  type="tel"
-                  placeholder="333 123 4567"
-                  value={formData.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                  error={errors.phone}
-                  helperText="Il tuo numero rimarra privato e non sara mai visibile ad altri utenti"
-                  required
-                />
-
-                <Input
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                  error={errors.password}
-                  helperText="Minimo 8 caratteri"
-                  required
-                />
-
-                <Input
-                  label="Conferma Password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                  error={errors.confirmPassword}
-                  required
-                />
-
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  isLoading={loading}
-                >
-                  Registrati
-                </Button>
+                <Input label="Email" type="email" placeholder="mario.rossi@email.com" value={formData.email} onChange={(e) => handleChange('email', e.target.value)} error={errors.email} helperText="Usa una email anonima per maggiore privacy" required />
+                <Input label="Telefono" type="tel" placeholder="333 123 4567" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} error={errors.phone} helperText="Il tuo numero rimarra privato e non sara mai visibile ad altri utenti" required />
+                <Input label="Password" type="password" placeholder="••••••••" value={formData.password} onChange={(e) => handleChange('password', e.target.value)} error={errors.password} helperText="Minimo 8 caratteri" required />
+                <Input label="Conferma Password" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={(e) => handleChange('confirmPassword', e.target.value)} error={errors.confirmPassword} required />
+                <Button type="submit" variant="primary" size="lg" fullWidth isLoading={loading}>Registrati</Button>
               </form>
-
               <div className="mt-6 text-center">
-                <p className="text-sm text-text-secondary">
-                  Hai gia un account?{' '}
-                  <Link href="/auth/login" className="text-primary hover:underline font-medium">
-                    Accedi
-                  </Link>
-                </p>
+                <p className="text-sm text-text-secondary">Hai gia un account? <Link href="/auth/login" className="text-primary hover:underline font-medium">Accedi</Link></p>
               </div>
             </>
           )}
