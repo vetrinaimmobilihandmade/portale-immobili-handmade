@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import ImageUpload from '@/components/ImageUpload';
+import ShareSocial from '@/components/ShareSocial';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { AlertCircle, CheckCircle, Palette } from 'lucide-react';
@@ -19,6 +20,7 @@ export default function NuovoHandmadePage() {
   const [error, setError] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -68,7 +70,6 @@ export default function NuovoHandmadePage() {
     if (formData.description.length < 50) newErrors.description = 'Minimo 50 caratteri';
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
     
-    // 🆕 VALIDAZIONE FOTO - MINIMO 3 OBBLIGATORIE
     if (imageUrls.length === 0) {
       newErrors.images = 'Devi caricare almeno 3 foto del prodotto';
     } else if (imageUrls.length < 3) {
@@ -150,10 +151,8 @@ export default function NuovoHandmadePage() {
         }
       }
 
+      setCreatedProductId(product.id);
       setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard/annunci');
-      }, 2000);
 
     } catch (err: any) {
       console.error('Error creating product:', err);
@@ -171,20 +170,34 @@ export default function NuovoHandmadePage() {
     );
   }
 
-  if (success) {
+  if (success && createdProductId) {
+    const productUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/handmade/${createdProductId}`;
+    
     return (
       <div className="min-h-screen bg-neutral-main flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-md p-8 max-w-md text-center">
+        <div className="bg-white rounded-xl shadow-md p-8 max-w-2xl w-full">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-text-primary mb-2">
+          <h2 className="text-2xl font-bold text-text-primary mb-2 text-center">
             Prodotto Creato!
           </h2>
-          <p className="text-text-secondary mb-4">
+          <p className="text-text-secondary mb-6 text-center">
             Il tuo prodotto è stato inviato in approvazione. Riceverai una notifica quando sarà pubblicato.
           </p>
-          <Button onClick={() => router.push('/dashboard/annunci')} variant="secondary">
+
+          {/* 🆕 COMPONENTE CONDIVISIONE SOCIAL */}
+          <ShareSocial
+            title={formData.title}
+            url={productUrl}
+            type="product"
+          />
+
+          <Button 
+            onClick={() => router.push('/dashboard/annunci')} 
+            variant="secondary"
+            fullWidth
+          >
             Vai ai Miei Annunci
           </Button>
         </div>
@@ -217,7 +230,6 @@ export default function NuovoHandmadePage() {
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 md:p-8">
           
-          {/* 🆕 SEZIONE IMMAGINI AGGIORNATA */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-text-primary mb-2">
               Foto Prodotto * (minimo 3)
