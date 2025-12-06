@@ -10,23 +10,22 @@ interface ContactSectionProps {
 }
 
 export default function ContactSection(props: ContactSectionProps) {
-  const { listingType, listingTitle, sellerEmail, sellerName } = props;
-  const typeLabel = listingType === 'property' ? 'immobile' : 'prodotto';
+  const typeLabel = props.listingType === 'property' ? 'immobile' : 'prodotto';
   
-  const subject = 'Interesse per: ' + listingTitle;
-  const messageBody = 'Ciao ' + sellerName + ',\n\n' + 
-    'sono interessato al tuo ' + typeLabel + ': "' + listingTitle + '".\n\n' +
-    'Vorrei avere maggiori informazioni.\n\n' +
-    'Grazie,';
-  
-  const mailtoUrl = 'mailto:' + sellerEmail + 
-    '?subject=' + encodeURIComponent(subject) + 
-    '&body=' + encodeURIComponent(messageBody);
+  function buildMailtoLink() {
+    const sub = encodeURIComponent('Interesse per: ' + props.listingTitle);
+    const msg = encodeURIComponent(
+      'Ciao ' + props.sellerName + ',\n\n' + 
+      'sono interessato al tuo ' + typeLabel + ': "' + props.listingTitle + '".\n\n' +
+      'Vorrei avere maggiori informazioni.\n\nGrazie,'
+    );
+    return 'mailto:' + props.sellerEmail + '?subject=' + sub + '&body=' + msg;
+  }
+
+  const mailtoUrl = buildMailtoLink();
 
   return (
     <div className="space-y-6">
-      
-      {/* Card Contatto Email */}
       <div className="bg-primary-lighter rounded-xl p-6">
         <h2 className="text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
           <Mail className="w-5 h-5 text-primary" />
@@ -42,7 +41,7 @@ export default function ContactSection(props: ContactSectionProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium text-text-primary">Invia Email</p>
-            <p className="text-sm text-text-secondary truncate">{sellerEmail}</p>
+            <p className="text-sm text-text-secondary truncate">{props.sellerEmail}</p>
           </div>
           <ExternalLink className="w-5 h-5 text-text-secondary group-hover:text-primary" />
         </a>
@@ -52,7 +51,6 @@ export default function ContactSection(props: ContactSectionProps) {
         </p>
       </div>
 
-      {/* Card Privacy */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
         <div className="flex items-start gap-3 mb-4">
           <Shield className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
@@ -61,7 +59,7 @@ export default function ContactSection(props: ContactSectionProps) {
               💡 Proteggi la tua Privacy
             </h3>
             <p className="text-sm text-text-secondary mb-4">
-              Non vuoi condividere la tua email reale? Usa un servizio di <strong>Email Forwarding Anonimo</strong>. 
+              Non vuoi condividere la tua email reale? Usa un servizio di Email Forwarding Anonimo. 
               Questi servizi creano email temporanee che inoltrano i messaggi alla tua vera email senza rivelarla.
             </p>
           </div>
