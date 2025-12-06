@@ -84,7 +84,7 @@ export default function TerminiPage() {
             <li>Pubblicare annunci di immobili (vendita, affitto, affitti brevi)</li>
             <li>Pubblicare annunci di prodotti artigianali handmade</li>
             <li>Cercare e visualizzare annunci di altri utenti</li>
-            <li>Comunicare direttamente con altri utenti tramite messaggistica interna</li>
+            <li>Comunicare direttamente con altri utenti tramite email</li>
           </ul>
           <p className="text-text-secondary">
             Il Portale agisce esclusivamente come intermediario tecnologico. Non siamo parte delle 
@@ -202,13 +202,22 @@ export default function TerminiPage() {
           <p className="text-text-secondary mb-3">
             Gli utenti sono gli unici responsabili per:
           </p>
-          <ul className="list-disc list-inside text-text-secondary space-y-2">
+          <ul className="list-disc list-inside text-text-secondary space-y-2 mb-4">
             <li>Negoziazione di prezzi e termini</li>
             <li>Modalità di pagamento</li>
             <li>Consegna o visione di beni</li>
             <li>Verifica della qualità e conformità</li>
             <li>Eventuali contratti scritti (es. contratti di locazione)</li>
           </ul>
+
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mt-4">
+            <p className="text-sm text-blue-800">
+              <strong>Comunicazione tra utenti:</strong> Il contatto tra inserzionisti e interessati 
+              avviene esclusivamente tramite email diretta. Gli utenti registrati possono visualizzare 
+              l'indirizzo email dell'inserzionista nell'annuncio per avviare la comunicazione in modo 
+              privato e sicuro.
+            </p>
+          </div>
         </div>
 
         {/* Section 7 */}
