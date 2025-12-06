@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Shield, ExternalLink } from 'lucide-react';
 import { isValidEmail, isValidPhone } from '@/lib/utils';
 
 export default function RegisterPage() {
@@ -78,7 +78,6 @@ export default function RegisterPage() {
       }
 
       if (authData.user) {
-        // Usa la service role key per bypassare RLS durante la registrazione
         const { error: profileError } = await supabase
           .from('user_profiles')
           .insert({
@@ -90,8 +89,7 @@ export default function RegisterPage() {
           });
 
         if (profileError) {
-          console.error('❌ Errore inserimento profilo:', profileError);
-          console.error('Dettagli:', JSON.stringify(profileError, null, 2));
+          console.error('Errore inserimento profilo:', profileError);
           setErrors({ general: `Errore nella creazione del profilo: ${profileError.message}` });
           setLoading(false);
           return;
@@ -137,7 +135,7 @@ export default function RegisterPage() {
                 Account Creato con Successo!
               </h3>
               <p className="text-text-secondary mb-2">
-                Controlla la tua email per confermare l'account.
+                Controlla la tua email per confermare l&apos;account.
               </p>
               <p className="text-sm text-text-secondary mb-6">
                 Ti abbiamo inviato un link di verifica a <strong>{formData.email}</strong>
@@ -150,6 +148,69 @@ export default function RegisterPage() {
             </div>
           ) : (
             <>
+              {/* Card Email Anonime */}
+              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-text-primary mb-1 text-sm">
+                      💡 Proteggi la tua Privacy
+                    </h3>
+                    <p className="text-xs text-text-secondary mb-3">
+                      Vuoi registrarti senza rivelare la tua email reale? Usa un servizio di <strong>Email Forwarding Anonimo</strong>!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  
+                    href="https://simplelogin.io"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
+                  >
+                    <span className="font-medium text-primary group-hover:underline">SimpleLogin</span>
+                    <ExternalLink className="w-3 h-3 text-text-secondary" />
+                  </a>
+
+                  
+                    href="https://anonaddy.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
+                  >
+                    <span className="font-medium text-primary group-hover:underline">AnonAddy</span>
+                    <ExternalLink className="w-3 h-3 text-text-secondary" />
+                  </a>
+
+                  
+                    href="https://relay.firefox.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
+                  >
+                    <span className="font-medium text-primary group-hover:underline">Firefox Relay</span>
+                    <ExternalLink className="w-3 h-3 text-text-secondary" />
+                  </a>
+
+                  
+                    href="https://duckduckgo.com/email"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 p-2 bg-white rounded-lg hover:shadow-sm transition-all text-xs group"
+                  >
+                    <span className="font-medium text-primary group-hover:underline">DuckDuckGo</span>
+                    <ExternalLink className="w-3 h-3 text-text-secondary" />
+                  </a>
+                </div>
+
+                <p className="text-xs text-text-secondary">
+                  <strong>Come funziona:</strong> Crei un alias email che inoltra i messaggi alla tua vera email mantenendola nascosta.
+                </p>
+              </div>
+
               {errors.general && (
                 <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
@@ -186,6 +247,7 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
                   error={errors.email}
+                  helperText="Usa una email anonima per maggiore privacy"
                   required
                 />
 
@@ -196,7 +258,7 @@ export default function RegisterPage() {
                   value={formData.phone}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   error={errors.phone}
-                  helperText="Formato italiano"
+                  helperText="Il tuo numero rimarrà privato e non sarà mai visibile ad altri utenti"
                   required
                 />
 
