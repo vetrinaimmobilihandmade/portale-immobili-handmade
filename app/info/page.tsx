@@ -66,10 +66,10 @@ export default function InfoPage() {
                 3
               </div>
               <h3 className="text-xl font-semibold text-text-primary mb-3">
-                Contatta Direttamente
+                Contatta via Email
               </h3>
               <p className="text-text-secondary">
-                Contatta gli inserzionisti tramite email, telefono o WhatsApp. I contatti sono visibili solo agli utenti registrati.
+                Contatta gli inserzionisti direttamente tramite email. L'indirizzo email è visibile solo agli utenti registrati.
               </p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function InfoPage() {
                   Contatto Diretto
                 </h3>
                 <p className="text-text-secondary">
-                  Nessun intermediario. Contatta venditori e acquirenti tramite email, telefono o WhatsApp.
+                  Nessun intermediario. Contatta venditori e acquirenti direttamente tramite email.
                 </p>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function InfoPage() {
                   Sicuro e Affidabile
                 </h3>
                 <p className="text-text-secondary">
-                  Tutti gli account sono verificati. Messaggistica sicura e protetta.
+                  Tutti gli account sono verificati. Comunicazione sicura via email.
                 </p>
               </div>
             </div>
