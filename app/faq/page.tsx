@@ -69,17 +69,17 @@ const faqs: FAQ[] = [
   {
     category: 'Sicurezza',
     question: 'Come posso essere sicuro che un annuncio sia affidabile?',
-    answer: 'Verifica sempre che l\'account sia verificato (icona di verifica sul profilo). Usa la messaggistica interna per comunicare e diffida di richieste di pagamenti anticipati fuori dal portale.',
+    answer: 'Verifica sempre che l\'account sia verificato (icona di verifica sul profilo). Contatta gli inserzionisti via email e diffida di richieste di pagamenti anticipati fuori dal portale.',
   },
   {
     category: 'Sicurezza',
     question: 'Come posso contattare un inserzionista?',
-    answer: 'Una volta loggato, puoi vedere i contatti diretti dell\'inserzionista (email, telefono, WhatsApp) nell\'annuncio. Solo gli utenti registrati possono vedere queste informazioni per garantire maggiore sicurezza.',
+    answer: 'Una volta loggato, puoi vedere l\'email dell\'inserzionista nell\'annuncio e contattarlo direttamente. Solo gli utenti registrati possono vedere queste informazioni per garantire maggiore sicurezza.',
   },
   {
     category: 'Sicurezza',
     question: 'Cosa faccio se ricevo messaggi sospetti?',
-    answer: 'Segnala immediatamente l\'utente tramite il pulsante "Segnala" presente in ogni conversazione. Il nostro team verificherà e prenderà provvedimenti.',
+    answer: 'Segnala immediatamente qualsiasi comportamento sospetto contattando il nostro supporto. Non condividere mai dati bancari o effettuare pagamenti al di fuori delle modalità concordate di persona.',
   },
   {
     category: 'Pagamenti',
