@@ -66,31 +66,33 @@ export default function RegisterPage() {
     setSuccess(false);
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const authResponse = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
       });
 
-      if (authError) {
-        setErrors({ general: authError.message });
+      if (authResponse.error) {
+        setErrors({ general: authResponse.error.message });
         setLoading(false);
         return;
       }
 
-      if (authData.user) {
-        const { error: profileError } = await supabase
+      if (authResponse.data.user) {
+        const fullName = formData.nome + ' ' + formData.cognome;
+        
+        const profileResponse = await supabase
           .from('user_profiles')
           .insert({
-            id: authData.user.id,
+            id: authResponse.data.user.id,
             email: formData.email,
-            full_name: `${formData.nome} ${formData.cognome}`,
+            full_name: fullName,
             phone: formData.phone,
             role: 'viewer',
           });
 
-        if (profileError) {
-          console.error('Errore inserimento profilo:', profileError);
-          setErrors({ general: `Errore nella creazione del profilo: ${profileError.message}` });
+        if (profileResponse.error) {
+          console.error('Errore inserimento profilo:', profileResponse.error);
+          setErrors({ general: 'Errore nella creazione del profilo: ' + profileResponse.error.message });
           setLoading(false);
           return;
         }
@@ -98,16 +100,21 @@ export default function RegisterPage() {
 
       setSuccess(true);
       setLoading(false);
-    } catch (err: any) {
+    } catch (err) {
       setErrors({ general: 'Errore durante la registrazione' });
       setLoading(false);
     }
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData };
+    newFormData[field as keyof typeof formData] = value;
+    setFormData(newFormData);
+    
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      const newErrors = { ...errors };
+      delete newErrors[field];
+      setErrors(newErrors);
     }
   };
 
@@ -148,7 +155,6 @@ export default function RegisterPage() {
             </div>
           ) : (
             <>
-              {/* Card Email Anonime */}
               <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -258,7 +264,7 @@ export default function RegisterPage() {
                   value={formData.phone}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   error={errors.phone}
-                  helperText="Il tuo numero rimarrà privato e non sarà mai visibile ad altri utenti"
+                  helperText="Il tuo numero rimarra privato e non sara mai visibile ad altri utenti"
                   required
                 />
 
@@ -296,7 +302,7 @@ export default function RegisterPage() {
 
               <div className="mt-6 text-center">
                 <p className="text-sm text-text-secondary">
-                  Hai già un account?{' '}
+                  Hai gia un account?{' '}
                   <Link href="/auth/login" className="text-primary hover:underline font-medium">
                     Accedi
                   </Link>
