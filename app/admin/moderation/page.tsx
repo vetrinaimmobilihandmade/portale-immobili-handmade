@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Shield, Home, Palette, Check, X, Eye, AlertCircle, RotateCcw, Archive, Trash2, MoreVertical, Edit } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -39,15 +38,6 @@ export default function ModerationPage() {
     rejected: 0,
     archived: 0,
   });
-
-  // 🔍 DEBUG: Log per capire cosa sta succedendo
-  useEffect(() => {
-    console.log('🔍 Admin Moderation Debug:');
-    console.log('  - Filter Status:', filterStatus);
-    console.log('  - Filter Type:', filterType);
-    console.log('  - Properties:', properties.length);
-    console.log('  - Products:', products.length);
-  }, [filterStatus, filterType, properties, products]);
 
   useEffect(() => {
     checkPermissions();
@@ -89,83 +79,79 @@ export default function ModerationPage() {
     const newStats: any = {};
 
     for (const status of statuses) {
-      const { count: propCount, error: propError } = await supabase
+      const { count: propCount } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .eq('status', status);
 
-      const { count: prodCount, error: prodError } = await supabase
+      const { count: prodCount } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true })
         .eq('status', status);
 
-      // 🔍 DEBUG: Log errori
-      if (propError) console.error('❌ Errore count properties:', propError);
-      if (prodError) console.error('❌ Errore count products:', prodError);
-
       newStats[status] = (propCount || 0) + (prodCount || 0);
     }
 
-    console.log('📊 Stats:', newStats);
     setStats(newStats);
   };
 
   const loadListings = async () => {
-  console.log('🔄 Loading listings...');
-  
-  // 📦 CARICA IMMOBILI - ✅ CORRETTO
-  if (filterType === 'all' || filterType === 'property') {
-    let propertyQuery = supabase
-      .from('properties')
-      .select(`
-        *,
-        user_profiles!properties_user_id_fkey (full_name, email)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (filterStatus !== 'all') {
-      propertyQuery = propertyQuery.eq('status', filterStatus);
-    }
-
-    const { data: propertiesData, error: propError } = await propertyQuery;
+    console.log('🔄 Loading listings...');
     
-    if (propError) {
-      console.error('❌ Errore caricamento properties:', propError);
+    // 📦 CARICA IMMOBILI
+    if (filterType === 'all' || filterType === 'property') {
+      let propertyQuery = supabase
+        .from('properties')
+        .select(`
+          *,
+          user_profiles!properties_user_id_fkey (full_name, email)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filterStatus !== 'all') {
+        propertyQuery = propertyQuery.eq('status', filterStatus);
+      }
+
+      const { data: propertiesData, error: propError } = await propertyQuery;
+      
+      if (propError) {
+        console.error('❌ Errore caricamento properties:', propError);
+      } else {
+        console.log('✅ Properties caricate:', propertiesData?.length || 0);
+        setProperties(propertiesData || []);
+      }
     } else {
-      console.log('✅ Properties caricate:', propertiesData?.length || 0);
-      setProperties(propertiesData || []);
-    }
-  } else {
-    setProperties([]);
-  }
-
-  // 🎨 CARICA PRODOTTI - ✅ CORRETTO
-  if (filterType === 'all' || filterType === 'product') {
-    let productQuery = supabase
-      .from('products')
-      .select(`
-        *,
-        user_profiles!products_user_id_fkey (full_name, email),
-        product_categories (name)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (filterStatus !== 'all') {
-      productQuery = productQuery.eq('status', filterStatus);
+      setProperties([]);
     }
 
-    const { data: productsData, error: prodError } = await productQuery;
-    
-    if (prodError) {
-      console.error('❌ Errore caricamento products:', prodError);
+    // 🎨 CARICA PRODOTTI
+    if (filterType === 'all' || filterType === 'product') {
+      let productQuery = supabase
+        .from('products')
+        .select(`
+          *,
+          user_profiles!products_user_id_fkey (full_name, email),
+          product_categories (name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filterStatus !== 'all') {
+        productQuery = productQuery.eq('status', filterStatus);
+      }
+
+      const { data: productsData, error: prodError } = await productQuery;
+      
+      if (prodError) {
+        console.error('❌ Errore caricamento products:', prodError);
+      } else {
+        console.log('✅ Products caricati:', productsData?.length || 0);
+        setProducts(productsData || []);
+      }
     } else {
-      console.log('✅ Products caricati:', productsData?.length || 0);
-      setProducts(productsData || []);
+      setProducts([]);
     }
-  } else {
-    setProducts([]);
-  }
-};
+  };
+
   const handleAction = async (action: string, id: string, type: 'property' | 'product') => {
     if (!user) return;
     
@@ -353,6 +339,9 @@ export default function ModerationPage() {
     }
   };
 
+  // CONTINUA NELLA PARTE 2...
+// ... CONTINUA DALLA PARTE 1
+
   const ModerationCard = ({ item, type }: { item: any; type: 'property' | 'product' }) => {
     const isProperty = type === 'property';
     const icon = isProperty ? Home : Palette;
@@ -503,21 +492,15 @@ export default function ModerationPage() {
 
                       <div className="border-t border-neutral-border my-1"></div>
 
-<Link
-  href={`/admin/moderation/edit/${type}/${item.id}`}
-  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-neutral-main transition-colors"
->
-  <Edit className="w-4 h-4" />
-  Modifica
-</Link>
-
-<button
-  onClick={() => openDeleteModal(item.id, type, item.title)}
-  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
->
-  <Trash2 className="w-4 h-4" />
-  Elimina
-</button>
+                      {item.status !== 'approved' && (
+                        <button
+                          onClick={() => handleAction('approve', item.id, type)}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                        >
+                          <Check className="w-4 h-4" />
+                          Approva
+                        </button>
+                      )}
 
                       {item.status !== 'rejected' && (
                         <button
@@ -550,6 +533,14 @@ export default function ModerationPage() {
                       )}
 
                       <div className="border-t border-neutral-border my-1"></div>
+
+                      <Link
+                        href={`/admin/moderation/edit/${type}/${item.id}`}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-primary hover:bg-neutral-main transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Modifica
+                      </Link>
 
                       <button
                         onClick={() => openDeleteModal(item.id, type, item.title)}
@@ -601,13 +592,6 @@ export default function ModerationPage() {
             <p className="text-text-secondary">
               Gestisci e modera tutti gli annunci della piattaforma
             </p>
-            
-            {/* 🔍 DEBUG INFO */}
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm font-mono text-blue-800">
-                🔍 Debug: Properties: {properties.length} | Products: {products.length} | Total: {allListings.length}
-              </p>
-            </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">
@@ -674,7 +658,7 @@ export default function ModerationPage() {
         </div>
       </div>
 
-      {/* MODALS - Unchanged */}
+      {/* Reject Modal */}
       {rejectModalOpen && actionItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -727,6 +711,7 @@ export default function ModerationPage() {
         </div>
       )}
 
+      {/* Delete Modal */}
       {deleteModalOpen && actionItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
