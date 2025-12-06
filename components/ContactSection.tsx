@@ -20,13 +20,10 @@ export default function ContactSection(props: ContactSectionProps) {
     <div className="bg-primary-lighter rounded-xl p-6">
       <h2 className="text-xl font-semibold text-text-primary mb-4 flex items-center gap-2">
         <Mail className="w-5 h-5 text-primary" />
-        Contatta l'inserzionista
+        Contatta l inserzionista
       </h2>
       
-      
-        href={mailtoUrl}
-        className="flex items-center gap-3 p-4 bg-white rounded-lg hover:shadow-md transition-all group"
-      >
+      <a href={mailtoUrl} className="flex items-center gap-3 p-4 bg-white rounded-lg hover:shadow-md transition-all group">
         <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
           <Mail className="w-6 h-6 text-primary group-hover:text-white" />
         </div>
@@ -37,9 +34,7 @@ export default function ContactSection(props: ContactSectionProps) {
         <ExternalLink className="w-5 h-5 text-text-secondary group-hover:text-primary" />
       </a>
 
-      <p className="text-xs text-text-secondary mt-3 text-center">
-        Il click aprirà il tuo client email
-      </p>
+      <p className="text-xs text-text-secondary mt-3 text-center">Il click aprira il tuo client email</p>
     </div>
   );
 }
