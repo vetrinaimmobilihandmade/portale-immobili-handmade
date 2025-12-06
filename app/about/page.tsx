@@ -191,8 +191,8 @@ export default function AboutPage() {
                   Contatto Diretto
                 </h3>
                 <p className="text-text-secondary">
-                  Nessun intermediario. Messaggistica integrata per comunicare direttamente con 
-                  venditori e acquirenti in modo sicuro e privato.
+                  Nessun intermediario. Contatta direttamente venditori e acquirenti tramite email 
+                  in modo sicuro e privato.
                 </p>
               </div>
             </div>
@@ -207,8 +207,8 @@ export default function AboutPage() {
                   Sicurezza e Privacy
                 </h3>
                 <p className="text-text-secondary">
-                  I tuoi dati sono protetti. Account verificati, comunicazioni criptate e 
-                  moderazione attiva per garantire un ambiente sicuro.
+                  I tuoi dati sono protetti. Account verificati, comunicazioni via email 
+                  e moderazione attiva per garantire un ambiente sicuro.
                 </p>
               </div>
             </div>
