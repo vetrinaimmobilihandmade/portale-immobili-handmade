@@ -1,21 +1,54 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Coffee, Heart } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Footer() {
+  const [siteSettings, setSiteSettings] = useState<any>(null);
+  const supabase = createClient();
+
+  // 🆕 CARICA IMPOSTAZIONI SITO
+  useEffect(() => {
+    loadSiteSettings();
+  }, []);
+
+  const loadSiteSettings = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .single();
+    
+    if (data) setSiteSettings(data);
+  };
+
   return (
     <footer className="bg-neutral-main border-t border-neutral-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        {/* Logo e Slogan */}
+        {/* 🆕 Logo e Slogan DINAMICI */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
-            </div>
-            <span className="font-bold text-lg text-primary">Portale</span>
+            {siteSettings?.site_logo_url ? (
+              <img 
+                src={siteSettings.site_logo_url} 
+                alt={siteSettings.site_name || 'Logo'}
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold">
+                  {siteSettings?.site_logo_letter || 'P'}
+                </span>
+              </div>
+            )}
+            <span className="font-bold text-lg text-primary">
+              {siteSettings?.site_name || 'Portale'}
+            </span>
           </div>
           <p className="text-sm text-text-secondary max-w-md">
-            Il tuo marketplace italiano per immobili e artigianato
+            {siteSettings?.site_tagline || 'Il tuo marketplace italiano per immobili e artigianato'}
           </p>
         </div>
 
@@ -136,7 +169,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-neutral-border">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-secondary">
-            <p>© 2025 Portale. Tutti i diritti riservati.</p>
+            <p>© 2025 {siteSettings?.site_name || 'Portale'}. Tutti i diritti riservati.</p>
             <p className="flex items-center gap-1">
               Made with <Heart className="w-4 h-4 text-secondary fill-secondary" /> in Italy
             </p>
