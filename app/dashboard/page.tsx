@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Palette, Plus, Heart, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { Home, Palette, Plus, Heart, Settings, LogOut } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import LogoutButton from '@/components/layout/Logout';
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
           <LogoutButton />
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           
           <Card>
             <div className="flex items-center gap-4">
@@ -86,18 +86,6 @@ export default async function DashboardPage() {
               <div>
                 <p className="text-sm text-text-secondary">Preferiti</p>
                 <p className="text-2xl font-bold text-text-primary">{favoritesCount || 0}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-text-secondary">Messaggi</p>
-                <p className="text-2xl font-bold text-text-primary">0</p>
               </div>
             </div>
           </Card>
