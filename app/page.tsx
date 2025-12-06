@@ -38,6 +38,60 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 🆕 Banner Aiuto/Contatti - SUBITO DOPO HERO */}
+      <section className="py-8 px-4 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border-y-2 border-orange-200">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg border-2 border-orange-300 overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 p-6 md:p-8">
+              
+              {/* Icona Attenzione Animata */}
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  {/* Cerchio esterno pulsante */}
+                  <div className="absolute inset-0 bg-orange-400 rounded-full animate-ping opacity-20"></div>
+                  {/* Icona principale */}
+                  <div className="relative w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center shadow-xl">
+                    <svg className="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  {/* Badge esclamativo */}
+                  <div className="absolute -top-1 -right-1 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shadow-md animate-bounce">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Testo */}
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-2xl md:text-3xl font-bold text-text-primary mb-2">
+                  Hai bisogno di aiuto? 🤝
+                </h3>
+                <p className="text-base md:text-lg text-text-secondary mb-1">
+                  Vuoi <strong className="text-orange-600">aggiungere nuove categorie</strong>, segnalare <strong className="text-orange-600">problemi</strong> o ricevere <strong className="text-orange-600">assistenza</strong>?
+                </p>
+                <p className="text-sm text-text-secondary">
+                  Il nostro team è a tua disposizione per qualsiasi necessità!
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <div className="flex-shrink-0">
+                <Link
+                  href="/contatti"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl font-bold shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Contattaci Ora
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Come Funziona */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
