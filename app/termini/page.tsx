@@ -1,6 +1,32 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { FileText, CheckCircle, XCircle, AlertTriangle, Scale } from 'lucide-react';
 
 export default function TerminiPage() {
+  const [siteSettings, setSiteSettings] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    loadSiteSettings();
+  }, []);
+
+  const loadSiteSettings = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .single();
+    
+    if (data) setSiteSettings(data);
+  };
+
+  // Valori di fallback se non ci sono dati
+  const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
+  const legalEmail = siteSettings?.legal_email || 'legal@portaleimmobili.it';
+  const supportPhone = siteSettings?.support_phone || '+39 347 123 4567';
+  const companyAddress = siteSettings?.company_address || 'Via Roma 123, 00100 Roma, Italia';
+
   return (
     <div className="min-h-screen bg-neutral-main">
       
@@ -12,7 +38,7 @@ export default function TerminiPage() {
             Termini e Condizioni
           </h1>
           <p className="text-xl text-blue-100">
-            Condizioni d'uso del servizio Portale Immobili & Handmade
+            Condizioni d'uso del servizio {siteName}
           </p>
           <p className="text-sm text-blue-200 mt-4">
             Ultimo aggiornamento: 30 Novembre 2025
@@ -29,7 +55,7 @@ export default function TerminiPage() {
             Introduzione
           </h2>
           <p className="text-text-secondary mb-4">
-            Benvenuto su Portale Immobili & Handmade (il "Servizio", "Portale", "noi", "nostro"). 
+            Benvenuto su {siteName} (il "Servizio", "Portale", "noi", "nostro"). 
             Questi Termini e Condizioni ("Termini") disciplinano l'accesso e l'utilizzo del nostro portale web.
           </p>
           <p className="text-text-secondary mb-4">
@@ -78,7 +104,7 @@ export default function TerminiPage() {
           </h2>
           
           <p className="text-text-secondary mb-3">
-            Portale Immobili & Handmade è una piattaforma gratuita che permette agli utenti di:
+            {siteName} è una piattaforma gratuita che permette agli utenti di:
           </p>
           <ul className="list-disc list-inside text-text-secondary space-y-2 mb-4">
             <li>Pubblicare annunci di immobili (vendita, affitto, affitti brevi)</li>
@@ -258,7 +284,7 @@ export default function TerminiPage() {
           
           <p className="text-text-secondary mb-3">
             Il Servizio e tutto il suo contenuto (design, logo, codice, testi) sono di proprietà 
-            di Portale Immobili & Handmade e sono protetti da copyright e altre leggi sulla proprietà intellettuale.
+            di {siteName} e sono protetti da copyright e altre leggi sulla proprietà intellettuale.
           </p>
           <p className="text-text-secondary mb-3">
             Gli utenti mantengono i diritti sui contenuti che pubblicano (foto, testi degli annunci), 
@@ -307,11 +333,11 @@ export default function TerminiPage() {
           
           <p className="text-text-secondary">
             Questi Termini sono regolati dalla legge italiana. Qualsiasi controversia sarà sottoposta 
-            alla giurisdizione esclusiva dei tribunali di Roma, Italia.
+            alla giurisdizione esclusiva dei tribunali competenti.
           </p>
         </div>
 
-        {/* Contact */}
+        {/* Contact - DATI DINAMICI */}
         <div className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-md p-8">
           <h2 className="text-2xl font-bold mb-4">
             12. Contattaci
@@ -320,9 +346,9 @@ export default function TerminiPage() {
             Per domande o chiarimenti riguardanti questi Termini e Condizioni:
           </p>
           <div className="space-y-2">
-            <p><strong>Email:</strong> <a href="mailto:legal@portaleimmobili.it" className="underline">legal@portaleimmobili.it</a></p>
-            <p><strong>Telefono:</strong> +39 347 123 4567</p>
-            <p><strong>Indirizzo:</strong> Via Roma 123, 00100 Roma, Italia</p>
+            <p><strong>Email:</strong> <a href={`mailto:${legalEmail}`} className="underline">{legalEmail}</a></p>
+            {supportPhone && <p><strong>Telefono:</strong> {supportPhone}</p>}
+            {companyAddress && <p><strong>Indirizzo:</strong> {companyAddress}</p>}
           </div>
         </div>
 
