@@ -1,6 +1,32 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { Shield, Eye, Lock, Users, Database, AlertTriangle } from 'lucide-react';
 
 export default function PrivacyPage() {
+  const [siteSettings, setSiteSettings] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    loadSiteSettings();
+  }, []);
+
+  const loadSiteSettings = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .single();
+    
+    if (data) setSiteSettings(data);
+  };
+
+  // Valori di fallback se non ci sono dati
+  const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
+  const privacyEmail = siteSettings?.privacy_email || 'privacy@portaleimmobili.it';
+  const supportPhone = siteSettings?.support_phone || '+39 347 123 4567';
+  const companyAddress = siteSettings?.company_address || 'Via Roma 123, 00100 Roma, Italia';
+
   return (
     <div className="min-h-screen bg-neutral-main">
       
@@ -29,7 +55,7 @@ export default function PrivacyPage() {
             Introduzione
           </h2>
           <p className="text-text-secondary mb-4">
-            La presente Privacy Policy descrive come Portale Immobili & Handmade ("noi", "nostro/a") raccoglie, 
+            La presente Privacy Policy descrive come {siteName} ("noi", "nostro/a") raccoglie, 
             utilizza e protegge le informazioni personali degli utenti ("tu", "tuo/a") che utilizzano il nostro 
             portale web (il "Servizio").
           </p>
@@ -182,7 +208,7 @@ export default function PrivacyPage() {
             <li><strong>Diritto di opposizione:</strong> Puoi opporti al trattamento dei tuoi dati</li>
           </ul>
           <p className="text-text-secondary mt-4">
-            Per esercitare questi diritti, contattaci all'indirizzo: <a href="mailto:privacy@portaleimmobili.it" className="text-primary hover:underline">privacy@portaleimmobili.it</a>
+            Per esercitare questi diritti, contattaci all'indirizzo: <a href={`mailto:${privacyEmail}`} className="text-primary hover:underline">{privacyEmail}</a>
           </p>
         </div>
 
@@ -251,7 +277,7 @@ export default function PrivacyPage() {
           </p>
         </div>
 
-        {/* Contact */}
+        {/* Contact - DATI DINAMICI */}
         <div className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-md p-8">
           <h2 className="text-2xl font-bold mb-4">
             10. Contattaci
@@ -260,9 +286,9 @@ export default function PrivacyPage() {
             Per domande o dubbi riguardanti questa Privacy Policy, puoi contattarci:
           </p>
           <div className="space-y-2">
-            <p><strong>Email:</strong> <a href="mailto:privacy@portaleimmobili.it" className="underline">privacy@portaleimmobili.it</a></p>
-            <p><strong>Telefono:</strong> +39 347 123 4567</p>
-            <p><strong>Indirizzo:</strong> Via Roma 123, 00100 Roma, Italia</p>
+            <p><strong>Email:</strong> <a href={`mailto:${privacyEmail}`} className="underline">{privacyEmail}</a></p>
+            {supportPhone && <p><strong>Telefono:</strong> {supportPhone}</p>}
+            {companyAddress && <p><strong>Indirizzo:</strong> {companyAddress}</p>}
           </div>
         </div>
 
