@@ -18,7 +18,9 @@ export default function ContactSection({
   const typeLabel = listingType === 'property' ? 'immobile' : 'prodotto';
   
   // Crea mailto link con oggetto e corpo pre-compilati
-  const mailtoLink = `mailto:${sellerEmail}?subject=${encodeURIComponent(`Interesse per: ${listingTitle}`)}&body=${encodeURIComponent(`Ciao ${sellerName},\n\nsono interessato al tuo ${typeLabel}: "${listingTitle}".\n\nVorrei avere maggiori informazioni.\n\nGrazie,\n`)}`;
+  const subject = encodeURIComponent('Interesse per: ' + listingTitle);
+  const body = encodeURIComponent('Ciao ' + sellerName + ',\n\nsono interessato al tuo ' + typeLabel + ': "' + listingTitle + '".\n\nVorrei avere maggiori informazioni.\n\nGrazie,\n');
+  const mailtoLink = 'mailto:' + sellerEmail + '?subject=' + subject + '&body=' + body;
 
   return (
     <div className="space-y-6">
