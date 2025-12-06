@@ -18,7 +18,6 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
   const supabase = createClient();
   const router = useRouter();
 
-  // 🆕 CARICA IMPOSTAZIONI SITO
   useEffect(() => {
     loadSiteSettings();
   }, []);
@@ -52,7 +51,6 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
         <div className="flex items-center justify-between h-16 lg:h-18">
           
           <div className="flex items-center gap-8">
-            {/* 🆕 LOGO DINAMICO */}
             <Link href="/" className="flex items-center gap-3">
               {siteSettings?.site_logo_url ? (
                 <img 
@@ -127,7 +125,7 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                       className="fixed inset-0 z-40"
                       onClick={() => setProfileMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-neutral-border z-50">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-neutral-border z-50">
                       <div className="p-4 border-b border-neutral-border">
                         <p className="font-semibold text-text-primary">{initialProfile.full_name}</p>
                         <p className="text-sm text-text-secondary">{initialProfile.email}</p>
@@ -143,7 +141,6 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                           <span className="text-text-primary">Dashboard</span>
                         </Link>
                         
-                        {/* Link Pannello Admin - solo per admin/editor */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
                           <Link
                             href="/admin/moderation"
@@ -155,7 +152,6 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                           </Link>
                         )}
 
-                        {/* 🆕 LINK IMPOSTAZIONI SITO - solo per admin/editor */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
                           <Link
                             href="/admin/impostazioni"
