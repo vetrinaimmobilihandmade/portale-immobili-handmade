@@ -38,7 +38,6 @@ export default function NuovoImmobilePage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Redirect se non può pubblicare
   useEffect(() => {
     if (!roleLoading && !canPublishListings) {
       router.push('/dashboard/nuovo');
@@ -61,7 +60,13 @@ export default function NuovoImmobilePage() {
     if (formData.description.length < 50) newErrors.description = 'Minimo 50 caratteri';
     if (!formData.address.trim()) newErrors.address = 'Indirizzo richiesto';
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
-    if (imageUrls.length === 0) newErrors.images = 'Carica almeno 1 immagine';
+    
+    // 🆕 VALIDAZIONE FOTO - MINIMO 5 OBBLIGATORIE
+    if (imageUrls.length === 0) {
+      newErrors.images = 'Devi caricare almeno 5 foto dell\'immobile';
+    } else if (imageUrls.length < 5) {
+      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 5 foto`;
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -84,14 +89,12 @@ export default function NuovoImmobilePage() {
     setError('');
 
     try {
-      // Ottieni email e telefono dal profilo
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('email, phone, full_name')
         .eq('id', userId)
         .single();
 
-      // Inserisci immobile
       const { data: property, error: propertyError } = await supabase
         .from('properties')
         .insert({
@@ -123,28 +126,26 @@ export default function NuovoImmobilePage() {
 
       if (propertyError) throw propertyError;
 
-      // Inserisci immagini nella tabella property_images
       if (imageUrls.length > 0 && property) {
-  const imageRecords = imageUrls.map((url, index) => ({
-    property_id: property.id,
-    thumbnail_url: url,  // ✅ CAMPO CORRETTO
-    full_url: url,       // ✅ CAMPO CORRETTO
-    display_order: index,
-    file_size: null,     // ✅ CAMPO OPZIONALE
-  }));
+        const imageRecords = imageUrls.map((url, index) => ({
+          property_id: property.id,
+          thumbnail_url: url,
+          full_url: url,
+          display_order: index,
+          file_size: null,
+        }));
 
-  const { error: imagesError } = await supabase
-    .from('property_images')
-    .insert(imageRecords);
+        const { error: imagesError } = await supabase
+          .from('property_images')
+          .insert(imageRecords);
 
-  if (imagesError) {
-    console.error('Error inserting images:', imagesError);
-  }
-}
+        if (imagesError) {
+          console.error('Error inserting images:', imagesError);
+        }
+      }
 
       setSuccess(true);
       
-      // Redirect dopo 2 secondi
       setTimeout(() => {
         router.push('/dashboard/annunci');
       }, 2000);
@@ -190,7 +191,6 @@ export default function NuovoImmobilePage() {
     <div className="min-h-screen bg-neutral-main py-8 px-4">
       <div className="max-w-4xl mx-auto">
         
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Home className="w-8 h-8 text-primary" />
@@ -203,7 +203,6 @@ export default function NuovoImmobilePage() {
           </p>
         </div>
 
-        {/* Error generale */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
@@ -211,19 +210,13 @@ export default function NuovoImmobilePage() {
           </div>
         )}
 
-        {/* Error immagini */}
-        {errors.images && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-            <p className="text-sm font-medium text-red-800">{errors.images}</p>
-          </div>
-        )}
-
-        {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 md:p-8">
           
-          {/* Immagini */}
+          {/* 🆕 SEZIONE IMMAGINI AGGIORNATA */}
           <div className="mb-8">
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              Foto Immobile * (minimo 5)
+            </label>
             <ImageUpload
               bucket="property-images"
               userId={userId || ''}
@@ -232,11 +225,28 @@ export default function NuovoImmobilePage() {
               onImagesChange={setImageUrls}
               initialImages={imageUrls}
             />
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-xs text-text-secondary">
+                Foto caricate: <strong className={imageUrls.length >= 5 ? 'text-green-600' : 'text-red-600'}>
+                  {imageUrls.length}/5 (minimo)
+                </strong>
+              </p>
+              {imageUrls.length < 5 && (
+                <p className="text-xs text-red-600 font-medium">
+                  ⚠️ Mancano {5 - imageUrls.length} foto
+                </p>
+              )}
+            </div>
+            {errors.images && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.images}
+              </p>
+            )}
           </div>
 
           <div className="space-y-6">
             
-            {/* Tipo e Categoria */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
@@ -273,7 +283,6 @@ export default function NuovoImmobilePage() {
               </div>
             </div>
 
-            {/* Titolo */}
             <Input
               label="Titolo Annuncio *"
               placeholder="Es: Bellissimo appartamento in centro"
@@ -284,7 +293,6 @@ export default function NuovoImmobilePage() {
               required
             />
 
-            {/* Descrizione */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-2">
                 Descrizione *
@@ -305,7 +313,6 @@ export default function NuovoImmobilePage() {
               <p className="text-xs text-text-secondary mt-1">Minimo 50 caratteri</p>
             </div>
 
-            {/* Indirizzo e Comune */}
             <div className="grid md:grid-cols-2 gap-6">
               <Input
                 label="Indirizzo *"
@@ -325,7 +332,6 @@ export default function NuovoImmobilePage() {
               />
             </div>
 
-            {/* Caratteristiche */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Input
                 label="Superficie (mq)"
@@ -357,7 +363,6 @@ export default function NuovoImmobilePage() {
               />
             </div>
 
-            {/* Piano e Anno */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Input
                 label="Piano"
@@ -382,7 +387,6 @@ export default function NuovoImmobilePage() {
               />
             </div>
 
-            {/* Classe Energetica */}
             <div>
               <label className="block text-sm font-medium text-text-primary mb-2">
                 Classe Energetica
@@ -404,14 +408,12 @@ export default function NuovoImmobilePage() {
               </select>
             </div>
 
-            {/* Info Box */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
                 <strong>💡 Nota:</strong> I tuoi dati di contatto (email e telefono) saranno visibili solo agli utenti registrati.
               </p>
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-4 pt-4">
               <Button
                 type="button"
