@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import ImageUpload from '@/components/ImageUpload';
+import ShareSocial from '@/components/ShareSocial';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { AlertCircle, CheckCircle, Home } from 'lucide-react';
@@ -18,6 +19,7 @@ export default function NuovoImmobilePage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -61,7 +63,6 @@ export default function NuovoImmobilePage() {
     if (!formData.address.trim()) newErrors.address = 'Indirizzo richiesto';
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
     
-    // 🆕 VALIDAZIONE FOTO - MINIMO 5 OBBLIGATORIE
     if (imageUrls.length === 0) {
       newErrors.images = 'Devi caricare almeno 5 foto dell\'immobile';
     } else if (imageUrls.length < 5) {
@@ -144,11 +145,8 @@ export default function NuovoImmobilePage() {
         }
       }
 
+      setCreatedPropertyId(property.id);
       setSuccess(true);
-      
-      setTimeout(() => {
-        router.push('/dashboard/annunci');
-      }, 2000);
 
     } catch (err: any) {
       console.error('Error creating property:', err);
@@ -166,20 +164,34 @@ export default function NuovoImmobilePage() {
     );
   }
 
-  if (success) {
+  if (success && createdPropertyId) {
+    const propertyUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/immobili/${createdPropertyId}`;
+    
     return (
       <div className="min-h-screen bg-neutral-main flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-md p-8 max-w-md text-center">
+        <div className="bg-white rounded-xl shadow-md p-8 max-w-2xl w-full">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-text-primary mb-2">
+          <h2 className="text-2xl font-bold text-text-primary mb-2 text-center">
             Annuncio Creato!
           </h2>
-          <p className="text-text-secondary mb-4">
+          <p className="text-text-secondary mb-6 text-center">
             Il tuo annuncio è stato inviato in approvazione. Riceverai una notifica quando sarà pubblicato.
           </p>
-          <Button onClick={() => router.push('/dashboard/annunci')} variant="primary">
+
+          {/* 🆕 COMPONENTE CONDIVISIONE SOCIAL */}
+          <ShareSocial
+            title={formData.title}
+            url={propertyUrl}
+            type="property"
+          />
+
+          <Button 
+            onClick={() => router.push('/dashboard/annunci')} 
+            variant="primary"
+            fullWidth
+          >
             Vai ai Miei Annunci
           </Button>
         </div>
@@ -212,7 +224,6 @@ export default function NuovoImmobilePage() {
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 md:p-8">
           
-          {/* 🆕 SEZIONE IMMAGINI AGGIORNATA */}
           <div className="mb-8">
             <label className="block text-sm font-medium text-text-primary mb-2">
               Foto Immobile * (minimo 5)
