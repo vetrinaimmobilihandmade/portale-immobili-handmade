@@ -14,15 +14,23 @@ interface HeaderClientProps {
 export default function HeaderClient({ user: initialUser, profile: initialProfile }: HeaderClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
   const supabase = createClient();
   const router = useRouter();
 
-  // DEBUG: Log per vedere cosa riceve il componente
+  // 🆕 CARICA IMPOSTAZIONI SITO
   useEffect(() => {
-    console.log('🔍 HeaderClient riceve:');
-    console.log('  - User:', initialUser);
-    console.log('  - Profile:', initialProfile);
-  }, [initialUser, initialProfile]);
+    loadSiteSettings();
+  }, []);
+
+  const loadSiteSettings = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .single();
+    
+    if (data) setSiteSettings(data);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -44,12 +52,23 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
         <div className="flex items-center justify-between h-16 lg:h-18">
           
           <div className="flex items-center gap-8">
+            {/* 🆕 LOGO DINAMICO */}
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
-              </div>
+              {siteSettings?.site_logo_url ? (
+                <img 
+                  src={siteSettings.site_logo_url} 
+                  alt={siteSettings.site_name || 'Logo'}
+                  className="w-10 h-10 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">
+                    {siteSettings?.site_logo_letter || 'P'}
+                  </span>
+                </div>
+              )}
               <span className="hidden sm:block font-bold text-xl text-primary">
-                Portale
+                {siteSettings?.site_name || 'Portale'}
               </span>
             </Link>
 
@@ -126,15 +145,27 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                         
                         {/* Link Pannello Admin - solo per admin/editor */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
-  <Link
-    href="/admin/moderation"  // ✅ NUOVO LINK
-    className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
-    onClick={() => setProfileMenuOpen(false)}
-  >
-    <Shield className="w-5 h-5 text-orange-600" />
-    <span className="text-text-primary">Pannello Admin</span>
-  </Link>
-)}
+                          <Link
+                            href="/admin/moderation"
+                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                            onClick={() => setProfileMenuOpen(false)}
+                          >
+                            <Shield className="w-5 h-5 text-orange-600" />
+                            <span className="text-text-primary">Pannello Admin</span>
+                          </Link>
+                        )}
+
+                        {/* 🆕 LINK IMPOSTAZIONI SITO - solo per admin/editor */}
+                        {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
+                          <Link
+                            href="/admin/impostazioni"
+                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                            onClick={() => setProfileMenuOpen(false)}
+                          >
+                            <Settings className="w-5 h-5 text-purple-600" />
+                            <span className="text-text-primary">Impostazioni Sito</span>
+                          </Link>
+                        )}
                         
                         <Link
                           href="/dashboard/profile"
