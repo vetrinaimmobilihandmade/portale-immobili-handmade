@@ -78,17 +78,19 @@ export default function HomePage() {
             </div>
 
             {/* Step 3 */}
-<div className="text-center">
-  <div className="w-16 h-16 bg-accent-lighter rounded-full flex items-center justify-center mx-auto mb-6">
-    <Shield className="w-8 h-8 text-accent" />
-  </div>
-  <h3 className="text-xl font-semibold text-text-primary mb-3">
-    3. Contatto Diretto via Email
-  </h3>
-  <p className="text-text-secondary">
-    Una volta registrato, contatta gli inserzionisti direttamente via email. Nessun intermediario, comunicazione privata e sicura.
-  </p>
-</div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent-lighter rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-8 h-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-semibold text-text-primary mb-3">
+                3. Contatto Diretto via Email
+              </h3>
+              <p className="text-text-secondary">
+                Una volta registrato, contatta gli inserzionisti direttamente via email. Nessun intermediario, comunicazione privata e sicura.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Sezioni Preview */}
