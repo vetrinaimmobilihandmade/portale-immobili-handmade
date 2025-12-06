@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard, Shield, Home, Palette } from 'lucide-react';
+import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard, Shield, Home, Palette, Users } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -121,7 +121,7 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
 
           <div className="flex items-center gap-4">
             
-            {/* 🆕 SEARCH DROPDOWN - DESKTOP */}
+            {/* SEARCH DROPDOWN - DESKTOP */}
             <div className="hidden md:block relative" ref={searchRef}>
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
@@ -206,7 +206,7 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
               )}
             </div>
 
-            {/* 🆕 SEARCH ICON - MOBILE */}
+            {/* SEARCH ICON - MOBILE */}
             <button 
               className="md:hidden p-2 hover:bg-neutral-main rounded-lg"
               onClick={() => setSearchOpen(!searchOpen)}
@@ -252,27 +252,49 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                           <span className="text-text-primary">Dashboard</span>
                         </Link>
                         
+                        {/* 🆕 MENU ADMIN - VISIBILE SOLO AD ADMIN/EDITOR */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
-                          <Link
-                            href="/admin/moderation"
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
-                            onClick={() => setProfileMenuOpen(false)}
-                          >
-                            <Shield className="w-5 h-5 text-orange-600" />
-                            <span className="text-text-primary">Pannello Admin</span>
-                          </Link>
-                        )}
+                          <>
+                            <div className="my-2 border-t border-neutral-border"></div>
+                            <div className="px-4 py-2">
+                              <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                                Amministrazione
+                              </p>
+                            </div>
+                            
+                            <Link
+                              href="/admin/moderation"
+                              className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                              onClick={() => setProfileMenuOpen(false)}
+                            >
+                              <Shield className="w-5 h-5 text-orange-600" />
+                              <span className="text-text-primary">Moderazione</span>
+                            </Link>
 
-                        {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
-                          <Link
-                            href="/admin/impostazioni"
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
-                            onClick={() => setProfileMenuOpen(false)}
-                          >
-                            <Settings className="w-5 h-5 text-purple-600" />
-                            <span className="text-text-primary">Impostazioni Sito</span>
-                          </Link>
+                            {/* 🆕 LINK GESTIONE UTENTI - SOLO ADMIN */}
+                            {initialProfile?.role === 'admin' && (
+                              <Link
+                                href="/admin/users"
+                                className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                                onClick={() => setProfileMenuOpen(false)}
+                              >
+                                <Users className="w-5 h-5 text-blue-600" />
+                                <span className="text-text-primary">Gestione Utenti</span>
+                              </Link>
+                            )}
+
+                            <Link
+                              href="/admin/impostazioni"
+                              className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                              onClick={() => setProfileMenuOpen(false)}
+                            >
+                              <Settings className="w-5 h-5 text-purple-600" />
+                              <span className="text-text-primary">Impostazioni Sito</span>
+                            </Link>
+                          </>
                         )}
+                        
+                        <div className="my-2 border-t border-neutral-border"></div>
                         
                         <Link
                           href="/dashboard/profile"
@@ -319,7 +341,7 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
           </div>
         </div>
 
-        {/* 🆕 MOBILE SEARCH DROPDOWN */}
+        {/* MOBILE SEARCH DROPDOWN */}
         {searchOpen && (
           <div className="md:hidden py-4 border-t border-neutral-border">
             <form onSubmit={handleSearch} className="space-y-3">
