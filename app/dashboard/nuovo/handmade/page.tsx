@@ -67,7 +67,14 @@ export default function NuovoHandmadePage() {
     if (!formData.description.trim()) newErrors.description = 'Descrizione richiesta';
     if (formData.description.length < 50) newErrors.description = 'Minimo 50 caratteri';
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
-    if (imageUrls.length === 0) newErrors.images = 'Carica almeno 1 immagine';
+    
+    // 🆕 VALIDAZIONE FOTO - MINIMO 3 OBBLIGATORIE
+    if (imageUrls.length === 0) {
+      newErrors.images = 'Devi caricare almeno 3 foto del prodotto';
+    } else if (imageUrls.length < 3) {
+      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 3 foto`;
+    }
+    
     if (formData.is_customizable && !formData.customization_notes.trim()) {
       newErrors.customization_notes = 'Specifica le opzioni di personalizzazione';
     }
@@ -208,16 +215,13 @@ export default function NuovoHandmadePage() {
           </div>
         )}
 
-        {errors.images && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-            <p className="text-sm font-medium text-red-800">{errors.images}</p>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 md:p-8">
           
+          {/* 🆕 SEZIONE IMMAGINI AGGIORNATA */}
           <div className="mb-8">
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              Foto Prodotto * (minimo 3)
+            </label>
             <ImageUpload
               bucket="product-images"
               userId={userId || ''}
@@ -226,6 +230,24 @@ export default function NuovoHandmadePage() {
               onImagesChange={setImageUrls}
               initialImages={imageUrls}
             />
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-xs text-text-secondary">
+                Foto caricate: <strong className={imageUrls.length >= 3 ? 'text-green-600' : 'text-red-600'}>
+                  {imageUrls.length}/3 (minimo)
+                </strong>
+              </p>
+              {imageUrls.length < 3 && (
+                <p className="text-xs text-red-600 font-medium">
+                  ⚠️ Mancano {3 - imageUrls.length} foto
+                </p>
+              )}
+            </div>
+            {errors.images && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.images}
+              </p>
+            )}
           </div>
 
           <div className="space-y-6">
