@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard, Shield } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Menu, Search, User, X, Settings, LogOut, LayoutDashboard, Shield, Home, Palette, Users } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -14,12 +14,26 @@ interface HeaderClientProps {
 export default function HeaderClient({ user: initialUser, profile: initialProfile }: HeaderClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchCategory, setSearchCategory] = useState<'immobili' | 'handmade'>('immobili');
+  const [searchQuery, setSearchQuery] = useState('');
   const [siteSettings, setSiteSettings] = useState<any>(null);
   const supabase = createClient();
   const router = useRouter();
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadSiteSettings();
+    
+    // Chiudi search dropdown se clicchi fuori
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const loadSiteSettings = async () => {
@@ -34,6 +48,19 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    
+    const url = searchCategory === 'immobili' 
+      ? `/immobili?search=${encodeURIComponent(searchQuery)}`
+      : `/handmade?search=${encodeURIComponent(searchQuery)}`;
+    
+    router.push(url);
+    setSearchOpen(false);
+    setSearchQuery('');
   };
 
   const getInitials = (name: string) => {
@@ -59,28 +86,13 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                   className="w-10 h-10 rounded-lg object-cover"
                 />
               ) : (
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ 
-                    backgroundColor: siteSettings?.logo_bg_color || '#2D5F8D'
-                  }}
-                >
-                  <span 
-                    className="font-bold text-xl"
-                    style={{ 
-                      color: siteSettings?.logo_text_color || '#FFFFFF'
-                    }}
-                  >
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">
                     {siteSettings?.site_logo_letter || 'P'}
                   </span>
                 </div>
               )}
-              <span 
-                className="hidden sm:block font-bold text-xl"
-                style={{ 
-                  color: siteSettings?.logo_text_color || '#2D5F8D'
-                }}
-              >
+              <span className="hidden sm:block font-bold text-xl text-primary">
                 {siteSettings?.site_name || 'Portale'}
               </span>
             </Link>
@@ -109,12 +121,96 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
 
           <div className="flex items-center gap-4">
             
-            <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-neutral-main rounded-lg hover:bg-neutral-hover transition-colors">
-              <Search className="w-5 h-5 text-text-secondary" />
-              <span className="text-sm text-text-secondary">Cerca...</span>
-            </button>
+            {/* SEARCH DROPDOWN - DESKTOP */}
+            <div className="hidden md:block relative" ref={searchRef}>
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-main rounded-lg hover:bg-neutral-hover transition-colors"
+              >
+                <Search className="w-5 h-5 text-text-secondary" />
+                <span className="text-sm text-text-secondary">Cerca...</span>
+              </button>
 
-            <button className="md:hidden p-2 hover:bg-neutral-main rounded-lg">
+              {searchOpen && (
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-neutral-border z-50">
+                  <form onSubmit={handleSearch} className="p-4">
+                    
+                    {/* Scelta Categoria */}
+                    <div className="flex gap-2 mb-3">
+                      <button
+                        type="button"
+                        onClick={() => setSearchCategory('immobili')}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                          searchCategory === 'immobili'
+                            ? 'bg-primary text-white'
+                            : 'bg-neutral-main text-text-primary hover:bg-neutral-hover'
+                        }`}
+                      >
+                        <Home className="w-4 h-4" />
+                        <span>Immobili</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSearchCategory('handmade')}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                          searchCategory === 'handmade'
+                            ? 'bg-secondary text-white'
+                            : 'bg-neutral-main text-text-primary hover:bg-neutral-hover'
+                        }`}
+                      >
+                        <Palette className="w-4 h-4" />
+                        <span>Handmade</span>
+                      </button>
+                    </div>
+
+                    {/* Input Ricerca */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder={`Cerca ${searchCategory}...`}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 px-4 py-3 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                      >
+                        <Search className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Link Veloci */}
+                    <div className="mt-4 pt-4 border-t border-neutral-border">
+                      <p className="text-xs text-text-secondary mb-2">Accesso rapido:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href="/immobili"
+                          className="text-xs px-3 py-1 bg-neutral-main hover:bg-neutral-hover rounded-full transition-colors"
+                          onClick={() => setSearchOpen(false)}
+                        >
+                          Tutti gli immobili
+                        </Link>
+                        <Link
+                          href="/handmade"
+                          className="text-xs px-3 py-1 bg-neutral-main hover:bg-neutral-hover rounded-full transition-colors"
+                          onClick={() => setSearchOpen(false)}
+                        >
+                          Tutti i prodotti
+                        </Link>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              )}
+            </div>
+
+            {/* SEARCH ICON - MOBILE */}
+            <button 
+              className="md:hidden p-2 hover:bg-neutral-main rounded-lg"
+              onClick={() => setSearchOpen(!searchOpen)}
+            >
               <Search className="w-5 h-5 text-text-primary" />
             </button>
 
@@ -156,27 +252,49 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                           <span className="text-text-primary">Dashboard</span>
                         </Link>
                         
+                        {/* 🆕 MENU ADMIN - VISIBILE SOLO AD ADMIN/EDITOR */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
-                          <Link
-                            href="/admin/moderation"
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
-                            onClick={() => setProfileMenuOpen(false)}
-                          >
-                            <Shield className="w-5 h-5 text-orange-600" />
-                            <span className="text-text-primary">Pannello Admin</span>
-                          </Link>
-                        )}
+                          <>
+                            <div className="my-2 border-t border-neutral-border"></div>
+                            <div className="px-4 py-2">
+                              <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                                Amministrazione
+                              </p>
+                            </div>
+                            
+                            <Link
+                              href="/admin/moderation"
+                              className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                              onClick={() => setProfileMenuOpen(false)}
+                            >
+                              <Shield className="w-5 h-5 text-orange-600" />
+                              <span className="text-text-primary">Moderazione</span>
+                            </Link>
 
-                        {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
-                          <Link
-                            href="/admin/impostazioni"
-                            className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
-                            onClick={() => setProfileMenuOpen(false)}
-                          >
-                            <Settings className="w-5 h-5 text-purple-600" />
-                            <span className="text-text-primary">Impostazioni Sito</span>
-                          </Link>
+                            {/* 🆕 LINK GESTIONE UTENTI - SOLO ADMIN */}
+                            {initialProfile?.role === 'admin' && (
+                              <Link
+                                href="/admin/users"
+                                className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                                onClick={() => setProfileMenuOpen(false)}
+                              >
+                                <Users className="w-5 h-5 text-blue-600" />
+                                <span className="text-text-primary">Gestione Utenti</span>
+                              </Link>
+                            )}
+
+                            <Link
+                              href="/admin/impostazioni"
+                              className="flex items-center gap-3 px-4 py-2 hover:bg-neutral-main transition-colors"
+                              onClick={() => setProfileMenuOpen(false)}
+                            >
+                              <Settings className="w-5 h-5 text-purple-600" />
+                              <span className="text-text-primary">Impostazioni Sito</span>
+                            </Link>
+                          </>
                         )}
+                        
+                        <div className="my-2 border-t border-neutral-border"></div>
                         
                         <Link
                           href="/dashboard/profile"
@@ -223,6 +341,60 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
           </div>
         </div>
 
+        {/* MOBILE SEARCH DROPDOWN */}
+        {searchOpen && (
+          <div className="md:hidden py-4 border-t border-neutral-border">
+            <form onSubmit={handleSearch} className="space-y-3">
+              
+              {/* Scelta Categoria Mobile */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSearchCategory('immobili')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+                    searchCategory === 'immobili'
+                      ? 'bg-primary text-white'
+                      : 'bg-neutral-main text-text-primary'
+                  }`}
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Immobili</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchCategory('handmade')}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+                    searchCategory === 'handmade'
+                      ? 'bg-secondary text-white'
+                      : 'bg-neutral-main text-text-primary'
+                  }`}
+                >
+                  <Palette className="w-4 h-4" />
+                  <span>Handmade</span>
+                </button>
+              </div>
+
+              {/* Input Ricerca Mobile */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder={`Cerca ${searchCategory}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-3 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* MOBILE MENU */}
         {mobileMenuOpen && (
           <div className="lg:hidden py-4 border-t border-neutral-border">
             <nav className="flex flex-col gap-4">
