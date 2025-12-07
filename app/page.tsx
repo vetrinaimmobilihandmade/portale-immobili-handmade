@@ -152,68 +152,68 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
             
-            {/* Immobili Preview */}
-            <div className="bg-white rounded-2xl p-8 shadow-md">
+            {/* Immobili Preview - 🎨 MODIFICATA CON STILE BLU */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-primary-lighter rounded-lg flex items-center justify-center">
-                  <Home className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Home className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-text-primary">Immobili</h3>
+                <h3 className="text-2xl font-bold text-blue-600">Immobili</h3>
               </div>
               <p className="text-text-secondary mb-6">
                 Cerca case in vendita, affitto o affitti brevi. Trova l'immobile perfetto per te in tutta Italia.
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-2 text-text-secondary">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                   Appartamenti, ville, terreni e altro
                 </li>
                 <li className="flex items-center gap-2 text-text-secondary">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                   Filtri avanzati per regione e provincia
                 </li>
                 <li className="flex items-center gap-2 text-text-secondary">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                   Contatto diretto con i proprietari
                 </li>
               </ul>
               <Link
                 href="/immobili"
-                className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+                className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:gap-3 transition-all"
               >
                 Esplora Immobili
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
 
-            {/* Handmade Preview */}
-            <div className="bg-white rounded-2xl p-8 shadow-md">
+            {/* Handmade Preview - INVARIATA */}
+            <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-secondary-lighter rounded-lg flex items-center justify-center">
-                  <Palette className="w-6 h-6 text-secondary" />
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <Palette className="w-6 h-6 text-orange-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-text-primary">Handmade</h3>
+                <h3 className="text-2xl font-bold text-orange-600">Handmade</h3>
               </div>
               <p className="text-text-secondary mb-6">
                 Scopri prodotti artigianali unici realizzati da artisti italiani. Ogni pezzo racconta una storia.
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-center gap-2 text-text-secondary">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
                   Ceramiche, legno, tessuti e gioielli
                 </li>
                 <li className="flex items-center gap-2 text-text-secondary">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
                   Prodotti personalizzabili su richiesta
                 </li>
                 <li className="flex items-center gap-2 text-text-secondary">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
                   Supporta artigiani locali
                 </li>
               </ul>
               <Link
                 href="/handmade"
-                className="inline-flex items-center gap-2 text-secondary font-semibold hover:gap-3 transition-all"
+                className="inline-flex items-center gap-2 text-orange-600 font-semibold hover:gap-3 transition-all"
               >
                 Scopri Handmade
                 <ArrowRight className="w-5 h-5" />
