@@ -71,9 +71,9 @@ export default function NuovoHandmadePage() {
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
     
     if (imageUrls.length === 0) {
-      newErrors.images = 'Devi caricare almeno 3 foto del prodotto';
-    } else if (imageUrls.length < 3) {
-      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 3 foto`;
+      newErrors.images = 'Devi caricare almeno 2 foto del prodotto';
+    } else if (imageUrls.length < 2) {
+      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 2 foto`;
     }
     
     if (formData.is_customizable && !formData.customization_notes.trim()) {
@@ -186,7 +186,6 @@ export default function NuovoHandmadePage() {
             Il tuo prodotto è stato inviato in approvazione. Riceverai una notifica quando sarà pubblicato.
           </p>
 
-          {/* 🆕 COMPONENTE CONDIVISIONE SOCIAL */}
           <ShareSocial
             title={formData.title}
             url={productUrl}
@@ -232,7 +231,7 @@ export default function NuovoHandmadePage() {
           
           <div className="mb-8">
             <label className="block text-sm font-medium text-text-primary mb-2">
-              Foto Prodotto * (minimo 3)
+              Foto Prodotto * (minimo 2)
             </label>
             <ImageUpload
               bucket="product-images"
@@ -244,13 +243,13 @@ export default function NuovoHandmadePage() {
             />
             <div className="mt-2 flex items-center justify-between">
               <p className="text-xs text-text-secondary">
-                Foto caricate: <strong className={imageUrls.length >= 3 ? 'text-green-600' : 'text-red-600'}>
-                  {imageUrls.length}/3 (minimo)
+                Foto caricate: <strong className={imageUrls.length >= 2 ? 'text-green-600' : 'text-red-600'}>
+                  {imageUrls.length}/2 (minimo)
                 </strong>
               </p>
-              {imageUrls.length < 3 && (
+              {imageUrls.length < 2 && (
                 <p className="text-xs text-red-600 font-medium">
-                  ⚠️ Mancano {3 - imageUrls.length} foto
+                  ⚠️ Mancano {2 - imageUrls.length} foto
                 </p>
               )}
             </div>
@@ -297,7 +296,7 @@ export default function NuovoHandmadePage() {
                 Descrizione *
               </label>
               <textarea
-                placeholder="Descrivi il tuo prodotto, i materiali utilizzati, le tecniche di lavorazione..."
+                placeholder="Descrivi il prodotto, i materiali utilizzati, le tecniche di lavorazione..."
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 rows={6}
