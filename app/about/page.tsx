@@ -1,7 +1,31 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { Heart, Target, Users, Lightbulb, Shield, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage() {
+  const [siteSettings, setSiteSettings] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    loadSiteSettings();
+  }, []);
+
+  const loadSiteSettings = async () => {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .single();
+    
+    if (data) setSiteSettings(data);
+  };
+
+  // Valori di fallback se non ci sono dati
+  const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
+  const supportEmail = siteSettings?.contact_email || 'info@portaleimmobili.it';
+
   return (
     <div className="min-h-screen bg-neutral-main">
       
@@ -216,7 +240,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section (Optional) */}
+      {/* Team Section */}
       <section className="py-16 px-4 bg-gradient-to-br from-primary to-blue-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">
@@ -255,6 +279,19 @@ export default function AboutPage() {
             >
               Contattaci
             </Link>
+          </div>
+          
+          {/* ✅ FIX: Email dinamica invece di hardcoded */}
+          <div className="mt-8 pt-8 border-t border-neutral-border">
+            <p className="text-sm text-text-secondary mb-2">
+              Hai domande o suggerimenti?
+            </p>
+            <a 
+              href={`mailto:${supportEmail}`}
+              className="text-primary hover:underline font-medium"
+            >
+              {supportEmail}
+            </a>
           </div>
         </div>
       </section>
