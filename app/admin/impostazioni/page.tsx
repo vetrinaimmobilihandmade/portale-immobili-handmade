@@ -7,7 +7,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import ImageUpload from '@/components/ImageUpload';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { Settings, AlertCircle, CheckCircle, Save, ArrowLeft } from 'lucide-react';
+import { Settings, AlertCircle, CheckCircle, Save, ArrowLeft, Palette } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -27,7 +27,24 @@ export default function AdminSettingsPage() {
     site_description: '',
     contact_email: '',
     contact_phone: '',
+    logo_bg_color: '#2D5F8D', // Default: Blu primario
+    logo_text_color: '#FFFFFF', // Default: Bianco
   });
+
+  // Palette colori disponibili
+  const bgColors = [
+    { name: 'Blu Primario', value: '#2D5F8D', preview: 'bg-[#2D5F8D]' },
+    { name: 'Arancione', value: '#E07A5F', preview: 'bg-[#E07A5F]' },
+    { name: 'Verde Accent', value: '#81B29A', preview: 'bg-[#81B29A]' },
+    { name: 'Grigio Scuro', value: '#3D3D3D', preview: 'bg-[#3D3D3D]' },
+  ];
+
+  const textColors = [
+    { name: 'Bianco', value: '#FFFFFF', preview: 'bg-white border' },
+    { name: 'Nero', value: '#3D3D3D', preview: 'bg-[#3D3D3D]' },
+    { name: 'Blu Primario', value: '#2D5F8D', preview: 'bg-[#2D5F8D]' },
+    { name: 'Arancione', value: '#E07A5F', preview: 'bg-[#E07A5F]' },
+  ];
 
   useEffect(() => {
     if (!roleLoading) {
@@ -56,6 +73,8 @@ export default function AdminSettingsPage() {
           site_description: data.site_description || '',
           contact_email: data.contact_email || '',
           contact_phone: data.contact_phone || '',
+          logo_bg_color: data.logo_bg_color || '#2D5F8D',
+          logo_text_color: data.logo_text_color || '#FFFFFF',
         });
 
         if (data.site_logo_url) {
@@ -90,11 +109,13 @@ export default function AdminSettingsPage() {
       const updateData = {
         site_name: formData.site_name,
         site_logo_url: logoUrls[0] || null,
-        site_logo_letter: formData.site_logo_letter || formData.site_name.charAt(0).toUpperCase(),
+        site_logo_letter: formData.site_logo_letter || formData.site_name.substring(0, 3).toUpperCase(),
         site_tagline: formData.site_tagline || null,
         site_description: formData.site_description || null,
         contact_email: formData.contact_email || null,
         contact_phone: formData.contact_phone || null,
+        logo_bg_color: formData.logo_bg_color,
+        logo_text_color: formData.logo_text_color,
         updated_by: userId,
         updated_at: new Date().toISOString(),
       };
@@ -121,7 +142,6 @@ export default function AdminSettingsPage() {
 
       setSuccess(true);
       
-      // Ricarica la pagina dopo 2 secondi per aggiornare header/footer
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -183,7 +203,7 @@ export default function AdminSettingsPage() {
             </h1>
           </div>
           <p className="text-text-secondary">
-            Configura nome, logo e informazioni del portale
+            Configura nome, logo, colori e informazioni del portale
           </p>
         </div>
 
@@ -237,23 +257,105 @@ export default function AdminSettingsPage() {
               />
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 mb-2"><strong>Anteprima:</strong></p>
-              <div className="flex items-center gap-3">
+            {/* 🎨 SEZIONE COLORI LOGO */}
+            <div className="mt-6 p-6 bg-purple-50 border-2 border-purple-200 rounded-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <Palette className="w-5 h-5 text-purple-600" />
+                <h3 className="font-semibold text-text-primary">Colori Logo</h3>
+              </div>
+
+              {/* Colore Sfondo Logo */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-text-primary mb-3">
+                  Colore Sfondo Logo
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {bgColors.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => handleChange('logo_bg_color', color.value)}
+                      className={`relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+                        formData.logo_bg_color === color.value
+                          ? 'border-purple-600 shadow-lg'
+                          : 'border-neutral-border hover:border-purple-300'
+                      }`}
+                    >
+                      <div className={`w-full h-12 rounded-md ${color.preview} mb-2`}></div>
+                      <p className="text-xs text-center font-medium text-text-primary">
+                        {color.name}
+                      </p>
+                      {formData.logo_bg_color === color.value && (
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Colore Testo Nome */}
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-3">
+                  Colore Testo Nome Sito
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {textColors.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => handleChange('logo_text_color', color.value)}
+                      className={`relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+                        formData.logo_text_color === color.value
+                          ? 'border-purple-600 shadow-lg'
+                          : 'border-neutral-border hover:border-purple-300'
+                      }`}
+                    >
+                      <div className={`w-full h-12 rounded-md ${color.preview} mb-2`}></div>
+                      <p className="text-xs text-center font-medium text-text-primary">
+                        {color.name}
+                      </p>
+                      {formData.logo_text_color === color.value && (
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Anteprima Logo */}
+            <div className="mt-6 p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl">
+              <p className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2">
+                <span>👁️</span> Anteprima Logo:
+              </p>
+              <div className="flex items-center gap-3 p-4 bg-white rounded-lg">
                 {logoUrls[0] ? (
                   <img 
                     src={logoUrls[0]} 
                     alt="Logo" 
-                    className="w-10 h-10 rounded-lg object-cover"
+                    className="w-12 h-12 rounded-lg object-cover shadow-md"
                   />
                 ) : (
-                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">
+                  <div 
+                    className="w-12 h-12 rounded-lg flex items-center justify-center shadow-md"
+                    style={{ backgroundColor: formData.logo_bg_color }}
+                  >
+                    <span 
+                      className="font-bold text-lg"
+                      style={{ color: formData.logo_text_color }}
+                    >
                       {formData.site_logo_letter || formData.site_name.substring(0, 3).toUpperCase() || 'PIH'}
                     </span>
                   </div>
                 )}
-                <span className="font-bold text-xl text-primary">
+                <span 
+                  className="font-bold text-2xl"
+                  style={{ color: formData.logo_text_color }}
+                >
                   {formData.site_name || 'Nome Sito'}
                 </span>
               </div>
