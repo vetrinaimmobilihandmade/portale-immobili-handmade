@@ -1,0 +1,506 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import ImageUpload from '@/components/ImageUpload';
+import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import { AlertCircle, CheckCircle, Home, ArrowLeft } from 'lucide-react';
+
+export default function EditPropertyPage() {
+  const params = useParams();
+  const router = useRouter();
+  const supabase = createClient();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [property, setProperty] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    property_type: 'vendita',
+    property_category: 'appartamento',
+    address: '',
+    municipality_name: '',
+    surface_mq: '',
+    rooms: '',
+    bedrooms: '',
+    bathrooms: '',
+    floor: '',
+    total_floors: '',
+    year_built: '',
+    energy_class: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    checkOwnershipAndLoad();
+  }, [params.id]);
+
+  const checkOwnershipAndLoad = async () => {
+    try {
+      // Verifica utente loggato
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/auth/login');
+        return;
+      }
+      setUserId(user.id);
+
+      // Carica immobile
+      const { data, error: fetchError } = await supabase
+        .from('properties')
+        .select(`
+          *,
+          property_images (thumbnail_url, full_url, display_order)
+        `)
+        .eq('id', params.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // ✅ VERIFICA 1: Solo il proprietario può modificare
+      if (data.user_id !== user.id) {
+        setError('Non hai i permessi per modificare questo annuncio');
+        setTimeout(() => router.push('/dashboard/annunci'), 2000);
+        return;
+      }
+
+      // ✅ VERIFICA 2: Non si possono modificare annunci archiviati o rifiutati
+      if (data.status === 'archived' || data.status === 'rejected') {
+        setError(`Non puoi modificare annunci ${data.status === 'archived' ? 'archiviati' : 'rifiutati'}`);
+        setTimeout(() => router.push('/dashboard/annunci'), 2000);
+        return;
+      }
+
+      setProperty(data);
+      
+      setFormData({
+        title: data.title || '',
+        description: data.description || '',
+        property_type: data.property_type,
+        property_category: data.property_category,
+        address: data.address || '',
+        municipality_name: data.municipality_name || '',
+        surface_mq: data.surface_mq?.toString() || '',
+        rooms: data.rooms?.toString() || '',
+        bedrooms: data.bedrooms?.toString() || '',
+        bathrooms: data.bathrooms?.toString() || '',
+        floor: data.floor?.toString() || '',
+        total_floors: data.total_floors?.toString() || '',
+        year_built: data.year_built?.toString() || '',
+        energy_class: data.energy_class || '',
+      });
+
+      const images = data.property_images
+        ?.sort((a: any, b: any) => a.display_order - b.display_order)
+        .map((img: any) => img.full_url) || [];
+      setImageUrls(images);
+
+    } catch (err: any) {
+      console.error('Error loading property:', err);
+      setError('Errore nel caricamento dell\'immobile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.title.trim()) newErrors.title = 'Titolo richiesto';
+    if (formData.title.length < 10) newErrors.title = 'Minimo 10 caratteri';
+    if (!formData.description.trim()) newErrors.description = 'Descrizione richiesta';
+    if (formData.description.length < 50) newErrors.description = 'Minimo 50 caratteri';
+    if (!formData.address.trim()) newErrors.address = 'Indirizzo richiesto';
+    if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
+    
+    if (imageUrls.length === 0) {
+      newErrors.images = 'Devi caricare almeno 5 foto dell\'immobile';
+    } else if (imageUrls.length < 5) {
+      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 5 foto`;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      // ✅ UPDATE: Aggiorna immobile e TORNA IN PENDING
+      const { error: updateError } = await supabase
+        .from('properties')
+        .update({
+          title: formData.title,
+          description: formData.description,
+          property_type: formData.property_type,
+          property_category: formData.property_category,
+          address: formData.address,
+          municipality_name: formData.municipality_name,
+          surface_mq: formData.surface_mq ? parseInt(formData.surface_mq) : null,
+          rooms: formData.rooms ? parseInt(formData.rooms) : null,
+          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
+          bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : null,
+          floor: formData.floor ? parseInt(formData.floor) : null,
+          total_floors: formData.total_floors ? parseInt(formData.total_floors) : null,
+          year_built: formData.year_built ? parseInt(formData.year_built) : null,
+          energy_class: formData.energy_class || null,
+          cover_image_url: imageUrls[0] || null,
+          status: 'pending', // ✅ TORNA IN PENDING
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', params.id);
+
+      if (updateError) throw updateError;
+
+      // Aggiorna immagini
+      await supabase
+        .from('property_images')
+        .delete()
+        .eq('property_id', params.id);
+
+      if (imageUrls.length > 0) {
+        const imageRecords = imageUrls.map((url, index) => ({
+          property_id: params.id as string,
+          thumbnail_url: url,
+          full_url: url,
+          display_order: index,
+          file_size: null,
+        }));
+
+        const { error: imagesError } = await supabase
+          .from('property_images')
+          .insert(imageRecords);
+
+        if (imagesError) {
+          console.error('Error inserting images:', imagesError);
+        }
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/dashboard/annunci');
+      }, 1500);
+
+    } catch (err: any) {
+      console.error('Error updating property:', err);
+      setError(err.message || 'Errore durante l\'aggiornamento');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-main flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-neutral-main flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-md p-8 max-w-md text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-10 h-10 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-text-primary mb-2">
+            Annuncio Aggiornato!
+          </h2>
+          <p className="text-text-secondary mb-4">
+            Le modifiche sono state salvate. L'annuncio è tornato in attesa di approvazione.
+          </p>
+          <p className="text-sm text-text-secondary">
+            Reindirizzamento alla dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-main py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/dashboard/annunci')}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Torna agli Annunci
+          </Button>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Home className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold text-text-primary">
+              Modifica Immobile
+            </h1>
+          </div>
+          <p className="text-text-secondary">
+            Modifica i dati del tuo annuncio. Dopo il salvataggio tornerà in attesa di approvazione.
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+            <p className="text-sm font-medium text-red-800">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6 md:p-8">
+          
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-text-primary mb-2">
+              Foto Immobile * (minimo 5)
+            </label>
+            <ImageUpload
+              bucket="property-images"
+              userId={userId || ''}
+              maxImages={10}
+              maxSizeMB={5}
+              onImagesChange={setImageUrls}
+              initialImages={imageUrls}
+            />
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-xs text-text-secondary">
+                Foto caricate: <strong className={imageUrls.length >= 5 ? 'text-green-600' : 'text-red-600'}>
+                  {imageUrls.length}/5 (minimo)
+                </strong>
+              </p>
+              {imageUrls.length < 5 && (
+                <p className="text-xs text-red-600 font-medium">
+                  ⚠️ Mancano {5 - imageUrls.length} foto
+                </p>
+              )}
+            </div>
+            {errors.images && (
+              <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.images}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Tipo Annuncio *
+                </label>
+                <select
+                  value={formData.property_type}
+                  onChange={(e) => handleChange('property_type', e.target.value)}
+                  className="w-full px-4 py-3 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="vendita">Vendita</option>
+                  <option value="affitto">Affitto</option>
+                  <option value="affitto_breve">Affitto Breve</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Categoria *
+                </label>
+                <select
+                  value={formData.property_category}
+                  onChange={(e) => handleChange('property_category', e.target.value)}
+                  className="w-full px-4 py-3 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="appartamento">Appartamento</option>
+                  <option value="villa">Villa</option>
+                  <option value="terreno">Terreno</option>
+                  <option value="ufficio">Ufficio</option>
+                  <option value="negozio">Negozio</option>
+                  <option value="garage">Garage</option>
+                  <option value="altro">Altro</option>
+                </select>
+              </div>
+            </div>
+
+            <Input
+              label="Titolo Annuncio *"
+              placeholder="Es: Bellissimo appartamento in centro"
+              value={formData.title}
+              onChange={(e) => handleChange('title', e.target.value)}
+              error={errors.title}
+              helperText="Minimo 10 caratteri"
+              required
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Descrizione *
+              </label>
+              <textarea
+                placeholder="Descrivi l'immobile in dettaglio..."
+                value={formData.description}
+                onChange={(e) => handleChange('description', e.target.value)}
+                rows={6}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
+                  errors.description ? 'border-red-500' : 'border-neutral-border'
+                }`}
+                required
+              />
+              {errors.description && (
+                <p className="text-sm text-red-600 mt-1">{errors.description}</p>
+              )}
+              <p className="text-xs text-text-secondary mt-1">Minimo 50 caratteri</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <Input
+                label="Indirizzo *"
+                placeholder="Via Roma 123"
+                value={formData.address}
+                onChange={(e) => handleChange('address', e.target.value)}
+                error={errors.address}
+                required
+              />
+              <Input
+                label="Comune *"
+                placeholder="Milano"
+                value={formData.municipality_name}
+                onChange={(e) => handleChange('municipality_name', e.target.value)}
+                error={errors.municipality_name}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Input
+                label="Superficie (mq)"
+                type="number"
+                placeholder="80"
+                value={formData.surface_mq}
+                onChange={(e) => handleChange('surface_mq', e.target.value)}
+              />
+              <Input
+                label="Locali"
+                type="number"
+                placeholder="3"
+                value={formData.rooms}
+                onChange={(e) => handleChange('rooms', e.target.value)}
+              />
+              <Input
+                label="Camere"
+                type="number"
+                placeholder="2"
+                value={formData.bedrooms}
+                onChange={(e) => handleChange('bedrooms', e.target.value)}
+              />
+              <Input
+                label="Bagni"
+                type="number"
+                placeholder="1"
+                value={formData.bathrooms}
+                onChange={(e) => handleChange('bathrooms', e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <Input
+                label="Piano"
+                type="number"
+                placeholder="3"
+                value={formData.floor}
+                onChange={(e) => handleChange('floor', e.target.value)}
+              />
+              <Input
+                label="Piani Totali"
+                type="number"
+                placeholder="5"
+                value={formData.total_floors}
+                onChange={(e) => handleChange('total_floors', e.target.value)}
+              />
+              <Input
+                label="Anno Costruzione"
+                type="number"
+                placeholder="2010"
+                value={formData.year_built}
+                onChange={(e) => handleChange('year_built', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Classe Energetica
+              </label>
+              <select
+                value={formData.energy_class}
+                onChange={(e) => handleChange('energy_class', e.target.value)}
+                className="w-full px-4 py-3 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="">Non specificata</option>
+                <option value="A+">A+</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="G">G</option>
+              </select>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>⚠️ Nota:</strong> Dopo aver salvato le modifiche, l'annuncio tornerà in stato "In Attesa" e dovrà essere nuovamente approvato dai moderatori.
+              </p>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => router.push('/dashboard/annunci')}
+                disabled={saving}
+              >
+                Annulla
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={saving}
+                className="flex-1"
+              >
+                Salva Modifiche
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
