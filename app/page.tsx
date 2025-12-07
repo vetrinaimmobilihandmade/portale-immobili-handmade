@@ -19,9 +19,10 @@ export default function HomePage() {
               Tutto in un unico posto, semplice e gratuito.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
+              {/* 🎨 PULSANTE IMMOBILI MODIFICATO - Stile come Handmade ma blu */}
               <Link
                 href="/immobili"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-hover text-white rounded-lg font-semibold transition-all hover:scale-105 shadow-md"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white hover:bg-neutral-hover border-2 border-blue-600 text-blue-600 rounded-lg font-semibold transition-colors shadow-md"
               >
                 Esplora Immobili
                 <ArrowRight className="w-5 h-5" />
@@ -38,7 +39,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 🆕 Banner Aiuto/Contatti - SUBITO DOPO HERO */}
+      {/* Banner Aiuto/Contatti */}
       <section className="py-8 px-4 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border-y-2 border-orange-200">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-2xl shadow-lg border-2 border-orange-300 overflow-hidden">
@@ -152,7 +153,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
             
-            {/* Immobili Preview - 🎨 MODIFICATA CON STILE BLU */}
+            {/* Immobili Preview */}
             <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -186,7 +187,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Handmade Preview - INVARIATA */}
+            {/* Handmade Preview */}
             <div className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-8 shadow-md hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -223,8 +224,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Finale */}
-      <section className="py-20 bg-primary text-white">
+      {/* 🎨 CTA Finale - SFONDO BLU MODIFICATO */}
+      <section className="py-20 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-6">
             Pronto a Iniziare?
@@ -234,7 +235,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/auth/register"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-neutral-main text-primary rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-neutral-main text-blue-600 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
           >
             Registrati Ora
             <ArrowRight className="w-5 h-5" />
