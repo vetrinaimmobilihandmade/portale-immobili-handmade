@@ -9,7 +9,6 @@ export default function Footer() {
   const [siteSettings, setSiteSettings] = useState<any>(null);
   const supabase = createClient();
 
-  // 🆕 CARICA IMPOSTAZIONI SITO
   useEffect(() => {
     loadSiteSettings();
   }, []);
@@ -27,7 +26,7 @@ export default function Footer() {
     <footer className="bg-neutral-main border-t border-neutral-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        {/* 🆕 Logo e Slogan DINAMICI */}
+        {/* Logo e Slogan DINAMICI */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             {siteSettings?.site_logo_url ? (
@@ -37,13 +36,28 @@ export default function Footer() {
                 className="w-8 h-8 rounded-lg object-cover"
               />
             ) : (
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">
+              <div 
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ 
+                  backgroundColor: siteSettings?.logo_bg_color || '#2D5F8D'
+                }}
+              >
+                <span 
+                  className="font-bold"
+                  style={{ 
+                    color: siteSettings?.logo_text_color || '#FFFFFF'
+                  }}
+                >
                   {siteSettings?.site_logo_letter || 'P'}
                 </span>
               </div>
             )}
-            <span className="font-bold text-lg text-primary">
+            <span 
+              className="font-bold text-lg"
+              style={{ 
+                color: siteSettings?.logo_text_color || '#2D5F8D'
+              }}
+            >
               {siteSettings?.site_name || 'Portale'}
             </span>
           </div>
@@ -121,7 +135,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonna 4 - Seguici (SENZA TWITTER) */}
+          {/* Colonna 4 - Seguici (Opzionale) */}
           <div>
             <h3 className="font-semibold text-text-primary mb-4">Seguici</h3>
             <ul className="space-y-3">
@@ -133,6 +147,11 @@ export default function Footer() {
               <li>
                 <a href="#" className="text-sm text-text-secondary hover:text-primary transition-colors">
                   Instagram
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-sm text-text-secondary hover:text-primary transition-colors">
+                  Twitter
                 </a>
               </li>
             </ul>
