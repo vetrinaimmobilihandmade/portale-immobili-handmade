@@ -64,9 +64,9 @@ export default function NuovoImmobilePage() {
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
     
     if (imageUrls.length === 0) {
-      newErrors.images = 'Devi caricare almeno 5 foto dell\'immobile';
-    } else if (imageUrls.length < 5) {
-      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 5 foto`;
+      newErrors.images = 'Devi caricare almeno 3 foto dell\'immobile';
+    } else if (imageUrls.length < 3) {
+      newErrors.images = `Hai caricato ${imageUrls.length} foto. Minimo richiesto: 3 foto`;
     }
 
     setErrors(newErrors);
@@ -180,7 +180,6 @@ export default function NuovoImmobilePage() {
             Il tuo annuncio è stato inviato in approvazione. Riceverai una notifica quando sarà pubblicato.
           </p>
 
-          {/* 🆕 COMPONENTE CONDIVISIONE SOCIAL */}
           <ShareSocial
             title={formData.title}
             url={propertyUrl}
@@ -226,7 +225,7 @@ export default function NuovoImmobilePage() {
           
           <div className="mb-8">
             <label className="block text-sm font-medium text-text-primary mb-2">
-              Foto Immobile * (minimo 5)
+              Foto Immobile * (minimo 3)
             </label>
             <ImageUpload
               bucket="property-images"
@@ -238,13 +237,13 @@ export default function NuovoImmobilePage() {
             />
             <div className="mt-2 flex items-center justify-between">
               <p className="text-xs text-text-secondary">
-                Foto caricate: <strong className={imageUrls.length >= 5 ? 'text-green-600' : 'text-red-600'}>
-                  {imageUrls.length}/5 (minimo)
+                Foto caricate: <strong className={imageUrls.length >= 3 ? 'text-green-600' : 'text-red-600'}>
+                  {imageUrls.length}/3 (minimo)
                 </strong>
               </p>
-              {imageUrls.length < 5 && (
+              {imageUrls.length < 3 && (
                 <p className="text-xs text-red-600 font-medium">
-                  ⚠️ Mancano {5 - imageUrls.length} foto
+                  ⚠️ Mancano {3 - imageUrls.length} foto
                 </p>
               )}
             </div>
