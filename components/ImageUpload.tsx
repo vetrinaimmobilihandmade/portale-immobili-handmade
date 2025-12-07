@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
 
@@ -25,6 +25,11 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const supabase = createClient();
+
+  // ✅ FIX: Sincronizza state quando initialImages cambia
+  useEffect(() => {
+    setImages(initialImages);
+  }, [initialImages]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
