@@ -91,6 +91,16 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          {/* 🆕 LINK PASSWORD DIMENTICATA */}
+          <div className="mt-4 text-center">
+            <Link 
+              href="/auth/forgot-password"
+              className="text-sm text-primary hover:underline"
+            >
+              Password dimenticata?
+            </Link>
+          </div>
+
           <div className="mt-6 text-center">
             <p className="text-sm text-text-secondary">
               Non hai un account?{' '}
