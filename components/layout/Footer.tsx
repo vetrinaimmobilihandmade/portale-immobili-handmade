@@ -121,7 +121,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonna 4 - Seguici (Opzionale) */}
+          {/* Colonna 4 - Seguici (SENZA TWITTER) */}
           <div>
             <h3 className="font-semibold text-text-primary mb-4">Seguici</h3>
             <ul className="space-y-3">
@@ -133,11 +133,6 @@ export default function Footer() {
               <li>
                 <a href="#" className="text-sm text-text-secondary hover:text-primary transition-colors">
                   Instagram
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-text-secondary hover:text-primary transition-colors">
-                  Twitter
                 </a>
               </li>
             </ul>
