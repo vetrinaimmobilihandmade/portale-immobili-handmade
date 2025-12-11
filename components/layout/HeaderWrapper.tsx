@@ -17,9 +17,18 @@ export default async function HeaderWrapper() {
       .eq('id', user.id)
       .single();
     
-    console.log('🔍 HeaderWrapper - Profile:', data);
-    console.log('🔍 HeaderWrapper - Profile Error:', profileError);
+    // ✅ FIX: Gestisce correttamente l'errore "profilo non trovato"
+    if (profileError) {
+      // PGRST116 = nessun risultato trovato (profilo non ancora creato)
+      if (profileError.code !== 'PGRST116') {
+        // Altri errori vanno loggati
+        console.error('🔍 HeaderWrapper - Profile Error:', profileError);
+      } else {
+        console.log('🔍 HeaderWrapper - Profile not found yet (user just registered)');
+      }
+    }
     
+    console.log('🔍 HeaderWrapper - Profile:', data);
     profile = data;
   }
   
