@@ -21,11 +21,10 @@ export default function PrivacyPage() {
     if (data) setSiteSettings(data);
   };
 
-  // Valori di fallback se non ci sono dati
+  // ✅ MODIFICATO: Usare contact_email e contact_phone da site_settings
   const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
-  const privacyEmail = siteSettings?.privacy_email || 'privacy@portaleimmobili.it';
-  const supportPhone = siteSettings?.support_phone || '+39 347 123 4567';
-  const companyAddress = siteSettings?.company_address || 'Via Roma 123, 00100 Roma, Italia';
+  const contactEmail = siteSettings?.contact_email || 'info@portaleimmobili.it';
+  const contactPhone = siteSettings?.contact_phone || '+39 347 123 4567';
 
   return (
     <div className="min-h-screen bg-neutral-main">
@@ -208,7 +207,7 @@ export default function PrivacyPage() {
             <li><strong>Diritto di opposizione:</strong> Puoi opporti al trattamento dei tuoi dati</li>
           </ul>
           <p className="text-text-secondary mt-4">
-            Per esercitare questi diritti, contattaci all'indirizzo: <a href={`mailto:${privacyEmail}`} className="text-primary hover:underline">{privacyEmail}</a>
+            Per esercitare questi diritti, contattaci all'indirizzo: <a href={`mailto:${contactEmail}`} className="text-primary hover:underline">{contactEmail}</a>
           </p>
         </div>
 
@@ -277,7 +276,7 @@ export default function PrivacyPage() {
           </p>
         </div>
 
-        {/* Contact - DATI DINAMICI */}
+        {/* Contact - DATI DINAMICI AGGIORNATI (senza indirizzo) */}
         <div className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-md p-8">
           <h2 className="text-2xl font-bold mb-4">
             10. Contattaci
@@ -286,9 +285,8 @@ export default function PrivacyPage() {
             Per domande o dubbi riguardanti questa Privacy Policy, puoi contattarci:
           </p>
           <div className="space-y-2">
-            <p><strong>Email:</strong> <a href={`mailto:${privacyEmail}`} className="underline">{privacyEmail}</a></p>
-            {supportPhone && <p><strong>Telefono:</strong> {supportPhone}</p>}
-            {companyAddress && <p><strong>Indirizzo:</strong> {companyAddress}</p>}
+            <p><strong>Email:</strong> <a href={`mailto:${contactEmail}`} className="underline">{contactEmail}</a></p>
+            {contactPhone && <p><strong>Telefono:</strong> {contactPhone}</p>}
           </div>
         </div>
 
