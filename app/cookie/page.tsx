@@ -22,10 +22,10 @@ export default function CookiePage() {
     if (data) setSiteSettings(data);
   };
 
-  // Valori di fallback se non ci sono dati
+  // ✅ MODIFICATO: Usare contact_email e contact_phone da site_settings
   const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
-  const privacyEmail = siteSettings?.privacy_email || 'privacy@portaleimmobili.it';
-  const supportPhone = siteSettings?.support_phone || '+39 347 123 4567';
+  const contactEmail = siteSettings?.contact_email || 'info@portaleimmobili.it';
+  const contactPhone = siteSettings?.contact_phone || '+39 347 123 4567';
 
   return (
     <div className="min-h-screen bg-neutral-main">
@@ -353,7 +353,7 @@ export default function CookiePage() {
           </p>
         </div>
 
-        {/* Contact & Links - DATI DINAMICI */}
+        {/* Contact & Links - DATI DINAMICI AGGIORNATI (senza indirizzo) */}
         <div className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-md p-8">
           <h2 className="text-2xl font-bold mb-4">
             Hai Domande?
@@ -362,8 +362,8 @@ export default function CookiePage() {
             Per domande sulla nostra Cookie Policy, contattaci:
           </p>
           <div className="space-y-2 mb-6">
-            <p><strong>Email:</strong> <a href={`mailto:${privacyEmail}`} className="underline">{privacyEmail}</a></p>
-            {supportPhone && <p><strong>Telefono:</strong> {supportPhone}</p>}
+            <p><strong>Email:</strong> <a href={`mailto:${contactEmail}`} className="underline">{contactEmail}</a></p>
+            {contactPhone && <p><strong>Telefono:</strong> {contactPhone}</p>}
           </div>
           <div className="pt-6 border-t border-blue-400">
             <p className="text-sm mb-3">Potrebbero interessarti anche:</p>
