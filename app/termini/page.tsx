@@ -21,11 +21,10 @@ export default function TerminiPage() {
     if (data) setSiteSettings(data);
   };
 
-  // Valori di fallback se non ci sono dati
+  // ✅ MODIFICATO: Usare contact_email e contact_phone da site_settings
   const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
-  const legalEmail = siteSettings?.legal_email || 'legal@portaleimmobili.it';
-  const supportPhone = siteSettings?.support_phone || '+39 347 123 4567';
-  const companyAddress = siteSettings?.company_address || 'Via Roma 123, 00100 Roma, Italia';
+  const contactEmail = siteSettings?.contact_email || 'info@portaleimmobili.it';
+  const contactPhone = siteSettings?.contact_phone || '+39 347 123 4567';
 
   return (
     <div className="min-h-screen bg-neutral-main">
@@ -337,7 +336,7 @@ export default function TerminiPage() {
           </p>
         </div>
 
-        {/* Contact - DATI DINAMICI */}
+        {/* Contact - DATI DINAMICI AGGIORNATI (senza indirizzo) */}
         <div className="bg-gradient-to-br from-primary to-blue-600 text-white rounded-xl shadow-md p-8">
           <h2 className="text-2xl font-bold mb-4">
             12. Contattaci
@@ -346,9 +345,8 @@ export default function TerminiPage() {
             Per domande o chiarimenti riguardanti questi Termini e Condizioni:
           </p>
           <div className="space-y-2">
-            <p><strong>Email:</strong> <a href={`mailto:${legalEmail}`} className="underline">{legalEmail}</a></p>
-            {supportPhone && <p><strong>Telefono:</strong> {supportPhone}</p>}
-            {companyAddress && <p><strong>Indirizzo:</strong> {companyAddress}</p>}
+            <p><strong>Email:</strong> <a href={`mailto:${contactEmail}`} className="underline">{contactEmail}</a></p>
+            {contactPhone && <p><strong>Telefono:</strong> {contactPhone}</p>}
           </div>
         </div>
 
