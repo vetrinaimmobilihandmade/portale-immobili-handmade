@@ -22,9 +22,10 @@ export default function AboutPage() {
     if (data) setSiteSettings(data);
   };
 
-  // Valori di fallback se non ci sono dati
+  // ✅ MODIFICATO: Usare contact_email e contact_phone da site_settings
   const siteName = siteSettings?.site_name || 'Portale Immobili & Handmade';
-  const supportEmail = siteSettings?.contact_email || 'info@portaleimmobili.it';
+  const contactEmail = siteSettings?.contact_email || 'info@portaleimmobili.it';
+  const contactPhone = siteSettings?.contact_phone || '+39 347 123 4567';
 
   return (
     <div className="min-h-screen bg-neutral-main">
@@ -281,17 +282,24 @@ export default function AboutPage() {
             </Link>
           </div>
           
-          {/* ✅ FIX: Email dinamica invece di hardcoded */}
+          {/* ✅ AGGIORNATO: Email e telefono dinamici (senza indirizzo) */}
           <div className="mt-8 pt-8 border-t border-neutral-border">
             <p className="text-sm text-text-secondary mb-2">
               Hai domande o suggerimenti?
             </p>
-            <a 
-              href={`mailto:${supportEmail}`}
-              className="text-primary hover:underline font-medium"
-            >
-              {supportEmail}
-            </a>
+            <div className="space-y-1">
+              <a 
+                href={`mailto:${contactEmail}`}
+                className="text-primary hover:underline font-medium block"
+              >
+                {contactEmail}
+              </a>
+              {contactPhone && (
+                <p className="text-sm text-text-secondary">
+                  Tel: {contactPhone}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </section>
