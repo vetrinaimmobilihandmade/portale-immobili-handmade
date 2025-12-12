@@ -8,13 +8,16 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next') || '/dashboard';
-
+  
   console.log('🔵 Code ricevuto:', code ? 'SI' : 'NO');
   console.log('🔵 URL completo:', requestUrl.toString());
 
   if (code) {
     try {
       const cookieStore = await cookies();
+      
+      // Array per memorizzare i cookie da settare
+      const cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }> = [];
 
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,18 +28,12 @@ export async function GET(request: Request) {
               return cookieStore.get(name)?.value;
             },
             set(name: string, value: string, options: CookieOptions) {
-              try {
-                cookieStore.set({ name, value, ...options });
-              } catch (error) {
-                console.error('❌ Errore set cookie:', error);
-              }
+              // Memorizza invece di settare direttamente
+              cookiesToSet.push({ name, value, options });
             },
             remove(name: string, options: CookieOptions) {
-              try {
-                cookieStore.set({ name, value: '', ...options });
-              } catch (error) {
-                console.error('❌ Errore remove cookie:', error);
-              }
+              // Memorizza la rimozione
+              cookiesToSet.push({ name, value: '', options });
             },
           },
         }
@@ -45,7 +42,7 @@ export async function GET(request: Request) {
       console.log('🔵 Tentativo exchangeCodeForSession...');
       
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-
+      
       console.log('🔵 Risultato exchange:', { 
         hasData: !!data, 
         error: error?.message 
@@ -59,8 +56,17 @@ export async function GET(request: Request) {
       }
 
       console.log('✅ Sessione creata, redirect a:', next);
-      return NextResponse.redirect(new URL(next, requestUrl.origin));
+      
+      // Crea la response con redirect
+      const response = NextResponse.redirect(new URL(next, requestUrl.origin));
+      
+      // Setta tutti i cookie nella response
+      cookiesToSet.forEach(({ name, value, options }) => {
+        response.cookies.set(name, value, options);
+      });
 
+      return response;
+      
     } catch (err: any) {
       console.error('❌ Errore catch callback:', err);
       return NextResponse.redirect(
