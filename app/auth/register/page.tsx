@@ -57,17 +57,28 @@ export default function RegisterPage() {
     setErrors({});
     setSuccess(false);
     try {
-      // 🔥 QUESTA È LA MODIFICA IMPORTANTE
+      // Determina l'URL di redirect (usa quello di produzione)
+      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+        : `${window.location.origin}/auth/callback`;
+      
+      console.log('🔵 Registrazione con redirect:', redirectUrl);
+      
       const res1 = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: formData.nome + ' ' + formData.cognome,
             phone: formData.phone,
           }
         }
+      });
+      
+      console.log('🔵 Risultato signUp:', { 
+        hasUser: !!res1.data.user, 
+        error: res1.error?.message 
       });
       
       if (res1.error) {
@@ -85,6 +96,7 @@ export default function RegisterPage() {
           role: 'viewer',
         });
         if (res2.error) {
+          console.error('❌ Errore user_profiles:', res2.error);
           setErrors({ general: 'Errore creazione profilo' });
           setLoading(false);
           return;
@@ -92,7 +104,8 @@ export default function RegisterPage() {
       }
       setSuccess(true);
       setLoading(false);
-    } catch (err) {
+    } catch (err: any) {
+      console.error('❌ Errore registrazione:', err);
       setErrors({ general: 'Errore durante la registrazione' });
       setLoading(false);
     }
