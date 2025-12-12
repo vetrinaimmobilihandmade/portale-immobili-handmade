@@ -54,4 +54,23 @@ export async function GET(request: Request) {
       if (error) {
         console.error('❌ Errore exchangeCodeForSession:', error);
         return NextResponse.redirect(
-          new URL(`/auth/login?error=${error.message}
+          new URL(`/auth/login?error=${error.message}`, requestUrl.origin)
+        );
+      }
+
+      console.log('✅ Sessione creata, redirect a:', next);
+      return NextResponse.redirect(new URL(next, requestUrl.origin));
+
+    } catch (err: any) {
+      console.error('❌ Errore catch callback:', err);
+      return NextResponse.redirect(
+        new URL(`/auth/login?error=callback_error`, requestUrl.origin)
+      );
+    }
+  }
+
+  console.log('❌ Nessun code trovato');
+  return NextResponse.redirect(
+    new URL('/auth/login?error=no_code', requestUrl.origin)
+  );
+}
