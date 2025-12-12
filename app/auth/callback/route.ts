@@ -7,10 +7,24 @@ export async function GET(request: Request) {
   
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const error = requestUrl.searchParams.get('error');
+  const errorCode = requestUrl.searchParams.get('error_code');
+  const errorDescription = requestUrl.searchParams.get('error_description');
   const next = requestUrl.searchParams.get('next') || '/dashboard';
   
   console.log('🔵 Code ricevuto:', code ? 'SI' : 'NO');
+  console.log('🔵 Error ricevuto:', error);
+  console.log('🔵 Error Code:', errorCode);
+  console.log('🔵 Error Description:', errorDescription);
   console.log('🔵 URL completo:', requestUrl.toString());
+
+  // Se c'è un errore da Supabase
+  if (error) {
+    console.error('❌ Errore da Supabase:', error, errorDescription);
+    return NextResponse.redirect(
+      new URL(`/auth/login?error=${errorDescription || error}`, requestUrl.origin)
+    );
+  }
 
   if (code) {
     try {
@@ -44,7 +58,9 @@ export async function GET(request: Request) {
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       
       console.log('🔵 Risultato exchange:', { 
-        hasData: !!data, 
+        hasData: !!data,
+        hasSession: !!data?.session,
+        hasUser: !!data?.user,
         error: error?.message 
       });
 
@@ -55,7 +71,15 @@ export async function GET(request: Request) {
         );
       }
 
-      console.log('✅ Sessione creata, redirect a:', next);
+      if (!data?.session) {
+        console.error('❌ Nessuna sessione creata');
+        return NextResponse.redirect(
+          new URL(`/auth/login?error=no_session`, requestUrl.origin)
+        );
+      }
+
+      console.log('✅ Sessione creata per utente:', data.user?.email);
+      console.log('✅ Redirect a:', next);
       
       // Crea la response con redirect
       const response = NextResponse.redirect(new URL(next, requestUrl.origin));
