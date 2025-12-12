@@ -57,15 +57,25 @@ export default function RegisterPage() {
     setErrors({});
     setSuccess(false);
     try {
+      // 🔥 QUESTA È LA MODIFICA IMPORTANTE
       const res1 = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            full_name: formData.nome + ' ' + formData.cognome,
+            phone: formData.phone,
+          }
+        }
       });
+      
       if (res1.error) {
         setErrors({ general: res1.error.message });
         setLoading(false);
         return;
       }
+      
       if (res1.data.user) {
         const res2 = await supabase.from('user_profiles').insert({
           id: res1.data.user.id,
