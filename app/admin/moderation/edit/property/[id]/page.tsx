@@ -22,13 +22,20 @@ export default function AdminEditPropertyPage() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [property, setProperty] = useState<any>(null);
 
+  // 🆕 State per regioni e province
+  const [regions, setRegions] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [loadingProvinces, setLoadingProvinces] = useState(false);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     property_type: 'vendita',
     property_category: 'appartamento',
-    address: '',
+    region_id: '', // 🆕 AGGIUNTO
+    province_id: '', // 🆕 AGGIUNTO
     municipality_name: '',
+    address: '',
     surface_mq: '',
     rooms: '',
     bedrooms: '',
@@ -47,10 +54,55 @@ export default function AdminEditPropertyPage() {
       if (!canModerate) {
         router.push('/dashboard');
       } else {
+        // 🆕 Carica regioni
+        loadRegions();
         loadProperty();
       }
     }
   }, [roleLoading, canModerate]);
+
+  // 🆕 Carica province quando cambia region_id
+  useEffect(() => {
+    if (formData.region_id) {
+      loadProvinces(parseInt(formData.region_id));
+    } else {
+      setProvinces([]);
+    }
+  }, [formData.region_id]);
+
+  // 🆕 Funzione per caricare regioni
+  const loadRegions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('regions')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setRegions(data || []);
+    } catch (err) {
+      console.error('Error loading regions:', err);
+    }
+  };
+
+  // 🆕 Funzione per caricare province di una regione
+  const loadProvinces = async (regionId: number) => {
+    setLoadingProvinces(true);
+    try {
+      const { data, error } = await supabase
+        .from('provinces')
+        .select('*')
+        .eq('region_id', regionId)
+        .order('name');
+
+      if (error) throw error;
+      setProvinces(data || []);
+    } catch (err) {
+      console.error('Error loading provinces:', err);
+    } finally {
+      setLoadingProvinces(false);
+    }
+  };
 
   const loadProperty = async () => {
     try {
@@ -73,8 +125,10 @@ export default function AdminEditPropertyPage() {
         description: data.description || '',
         property_type: data.property_type,
         property_category: data.property_category,
-        address: data.address || '',
+        region_id: data.region_id?.toString() || '', // 🆕 AGGIUNTO
+        province_id: data.province_id?.toString() || '', // 🆕 AGGIUNTO
         municipality_name: data.municipality_name || '',
+        address: data.address || '',
         surface_mq: data.surface_mq?.toString() || '',
         rooms: data.rooms?.toString() || '',
         bedrooms: data.bedrooms?.toString() || '',
@@ -91,6 +145,11 @@ export default function AdminEditPropertyPage() {
         ?.sort((a: any, b: any) => a.display_order - b.display_order)
         .map((img: any) => img.full_url) || [];
       setImageUrls(images);
+
+      // 🆕 Carica province se c'è già una regione
+      if (data.region_id) {
+        loadProvinces(data.region_id);
+      }
 
     } catch (err: any) {
       console.error('Error loading property:', err);
@@ -115,6 +174,11 @@ export default function AdminEditPropertyPage() {
     if (!formData.description.trim()) newErrors.description = 'Descrizione richiesta';
     if (formData.description.length < 50) newErrors.description = 'Minimo 50 caratteri';
     if (!formData.address.trim()) newErrors.address = 'Indirizzo richiesto';
+    
+    // 🆕 Validazione regione e provincia
+    if (!formData.region_id) newErrors.region_id = 'Seleziona una regione';
+    if (!formData.province_id) newErrors.province_id = 'Seleziona una provincia';
+    
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
 
     setErrors(newErrors);
@@ -141,8 +205,10 @@ export default function AdminEditPropertyPage() {
           description: formData.description,
           property_type: formData.property_type,
           property_category: formData.property_category,
-          address: formData.address,
+          region_id: formData.region_id ? parseInt(formData.region_id) : null, // 🆕 AGGIUNTO
+          province_id: formData.province_id ? parseInt(formData.province_id) : null, // 🆕 AGGIUNTO
           municipality_name: formData.municipality_name,
+          address: formData.address,
           surface_mq: formData.surface_mq ? parseInt(formData.surface_mq) : null,
           rooms: formData.rooms ? parseInt(formData.rooms) : null,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
@@ -354,23 +420,90 @@ export default function AdminEditPropertyPage() {
               <p className="text-xs text-text-secondary mt-1">Minimo 50 caratteri</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <Input
-                label="Indirizzo *"
-                placeholder="Via Roma 123"
-                value={formData.address}
-                onChange={(e) => handleChange('address', e.target.value)}
-                error={errors.address}
-                required
-              />
-              <Input
-                label="Comune *"
-                placeholder="Milano"
-                value={formData.municipality_name}
-                onChange={(e) => handleChange('municipality_name', e.target.value)}
-                error={errors.municipality_name}
-                required
-              />
+            {/* 🆕 SEZIONE LOCALITÀ */}
+            <div className="pt-6 border-t border-neutral-border">
+              <h3 className="text-lg font-semibold text-text-primary mb-4">
+                📍 Località Immobile
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                {/* 🆕 SELECT REGIONE */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Regione *
+                  </label>
+                  <select
+                    value={formData.region_id}
+                    onChange={(e) => handleChange('region_id', e.target.value)}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                      errors.region_id ? 'border-red-500' : 'border-neutral-border'
+                    }`}
+                    required
+                  >
+                    <option value="">Seleziona regione</option>
+                    {regions.map((region) => (
+                      <option key={region.id} value={region.id}>
+                        {region.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.region_id && (
+                    <p className="text-sm text-red-600 mt-1">{errors.region_id}</p>
+                  )}
+                </div>
+
+                {/* 🆕 SELECT PROVINCIA */}
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Provincia *
+                  </label>
+                  <select
+                    value={formData.province_id}
+                    onChange={(e) => handleChange('province_id', e.target.value)}
+                    disabled={!formData.region_id || loadingProvinces}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-neutral-main disabled:cursor-not-allowed ${
+                      errors.province_id ? 'border-red-500' : 'border-neutral-border'
+                    }`}
+                    required
+                  >
+                    <option value="">
+                      {!formData.region_id 
+                        ? 'Prima seleziona una regione' 
+                        : loadingProvinces 
+                        ? 'Caricamento...' 
+                        : 'Seleziona provincia'}
+                    </option>
+                    {provinces.map((province) => (
+                      <option key={province.id} value={province.id}>
+                        {province.name} ({province.code})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.province_id && (
+                    <p className="text-sm text-red-600 mt-1">{errors.province_id}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Campo Comune e Indirizzo */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Input
+                  label="Comune *"
+                  placeholder="Milano"
+                  value={formData.municipality_name}
+                  onChange={(e) => handleChange('municipality_name', e.target.value)}
+                  error={errors.municipality_name}
+                  required
+                />
+                <Input
+                  label="Indirizzo *"
+                  placeholder="Via Roma 123"
+                  value={formData.address}
+                  onChange={(e) => handleChange('address', e.target.value)}
+                  error={errors.address}
+                  required
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
