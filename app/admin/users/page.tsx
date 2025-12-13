@@ -7,7 +7,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
-import { Users, Download, Search, Filter, Calendar, Mail, Phone, Shield, ArrowLeft } from 'lucide-react';
+import { Users, Download, Search, Filter, Calendar, Mail, Phone, Shield, ArrowLeft, Briefcase } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
 export default function AdminUsersPage() {
@@ -21,6 +21,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [agencyContactFilter, setAgencyContactFilter] = useState<string>('all'); // 🆕 AGGIUNTO
 
   // Statistiche
   const [stats, setStats] = useState({
@@ -31,6 +32,7 @@ export default function AdminUsersPage() {
     viewer: 0,
     active: 0,
     verified: 0,
+    acceptAgencyContact: 0, // 🆕 AGGIUNTO
   });
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     filterUsers();
-  }, [users, searchQuery, roleFilter, statusFilter]);
+  }, [users, searchQuery, roleFilter, statusFilter, agencyContactFilter]); // 🆕 AGGIUNTO
 
   const loadUsers = async () => {
     setLoading(true);
@@ -76,6 +78,7 @@ export default function AdminUsersPage() {
       viewer: userData.filter(u => u.role === 'viewer').length,
       active: userData.filter(u => u.is_active).length,
       verified: userData.filter(u => u.email_verified).length,
+      acceptAgencyContact: userData.filter(u => u.accept_agency_contact).length, // 🆕 AGGIUNTO
     });
   };
 
@@ -108,6 +111,13 @@ export default function AdminUsersPage() {
       filtered = filtered.filter(user => !user.email_verified);
     }
 
+    // 🆕 NUOVO: Filtro Contatto Agenzia
+    if (agencyContactFilter === 'yes') {
+      filtered = filtered.filter(user => user.accept_agency_contact);
+    } else if (agencyContactFilter === 'no') {
+      filtered = filtered.filter(user => !user.accept_agency_contact);
+    }
+
     setFilteredUsers(filtered);
   };
 
@@ -121,6 +131,7 @@ export default function AdminUsersPage() {
       'Ruolo': user.role,
       'Attivo': user.is_active ? 'Sì' : 'No',
       'Email Verificata': user.email_verified ? 'Sì' : 'No',
+      'Contatto Agenzia': user.accept_agency_contact ? 'Sì' : 'No', // 🆕 AGGIUNTO
       'Data Registrazione': formatDate(user.created_at),
       'Ultimo Aggiornamento': formatDate(user.updated_at),
     }));
@@ -214,7 +225,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <div className="bg-white rounded-lg border border-neutral-border p-4">
             <p className="text-sm text-text-secondary mb-1">Totale Utenti</p>
             <p className="text-2xl font-bold text-text-primary">{stats.total}</p>
@@ -231,6 +242,11 @@ export default function AdminUsersPage() {
             <p className="text-sm text-text-secondary mb-1">Inserzionisti</p>
             <p className="text-2xl font-bold text-primary">{stats.inserzionista}</p>
           </div>
+          {/* 🆕 NUOVO: Stat Card Contatto Agenzia */}
+          <div className="bg-white rounded-lg border border-neutral-border p-4">
+            <p className="text-sm text-text-secondary mb-1">Contatto Agenzia</p>
+            <p className="text-2xl font-bold text-orange-600">{stats.acceptAgencyContact}</p>
+          </div>
         </div>
 
         {/* Filtri */}
@@ -240,7 +256,7 @@ export default function AdminUsersPage() {
             <h3 className="font-semibold text-text-primary">Filtri</h3>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-4 gap-4">
             <Input
               placeholder="Cerca per nome, email, telefono..."
               value={searchQuery}
@@ -274,6 +290,19 @@ export default function AdminUsersPage() {
                 <option value="unverified">Email non verificata</option>
               </select>
             </div>
+
+            {/* 🆕 NUOVO: Filtro Contatto Agenzia */}
+            <div>
+              <select
+                value={agencyContactFilter}
+                onChange={(e) => setAgencyContactFilter(e.target.value)}
+                className="w-full px-4 py-3 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">Contatto Agenzia</option>
+                <option value="yes">Sì (Interessati)</option>
+                <option value="no">No</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -295,6 +324,10 @@ export default function AdminUsersPage() {
                   <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
                     Stato
                   </th>
+                  {/* 🆕 NUOVA: Colonna Contatto Agenzia */}
+                  <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
+                    Agenzia
+                  </th>
                   <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
                     Registrato
                   </th>
@@ -303,7 +336,7 @@ export default function AdminUsersPage() {
               <tbody className="divide-y divide-neutral-border">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center">
+                    <td colSpan={6} className="px-6 py-12 text-center">
                       <Search className="w-12 h-12 text-text-disabled mx-auto mb-3" />
                       <p className="text-text-secondary">Nessun utente trovato</p>
                     </td>
@@ -358,6 +391,18 @@ export default function AdminUsersPage() {
                               ✓ Verificato
                             </Badge>
                           )}
+                        </div>
+                      </td>
+                      {/* 🆕 NUOVA: Colonna Contatto Agenzia */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className={`w-4 h-4 ${user.accept_agency_contact ? 'text-orange-600' : 'text-gray-400'}`} />
+                          <Badge 
+                            variant="default" 
+                            className={user.accept_agency_contact ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-600'}
+                          >
+                            {user.accept_agency_contact ? 'Sì' : 'No'}
+                          </Badge>
                         </div>
                       </td>
                       <td className="px-6 py-4">
