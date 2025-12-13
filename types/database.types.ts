@@ -14,7 +14,7 @@ export type Database = {
           bio: string | null;
           is_active: boolean;
           email_verified: boolean;
-          accept_agency_contact: boolean; // 🆕 AGGIUNTO
+          accept_agency_contact: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -28,7 +28,7 @@ export type Database = {
           bio?: string | null;
           is_active?: boolean;
           email_verified?: boolean;
-          accept_agency_contact?: boolean; // 🆕 AGGIUNTO
+          accept_agency_contact?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -42,7 +42,7 @@ export type Database = {
           bio?: string | null;
           is_active?: boolean;
           email_verified?: boolean;
-          accept_agency_contact?: boolean; // 🆕 AGGIUNTO
+          accept_agency_contact?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -543,6 +543,47 @@ export type Database = {
           read_at?: string | null;
           created_at?: string;
           expires_at?: string;
+        };
+      };
+      site_settings: {
+        Row: {
+          id: string;
+          site_name: string;
+          site_logo_url: string | null;
+          site_logo_letter: string;
+          site_tagline: string | null;
+          site_description: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          site_name: string;
+          site_logo_url?: string | null;
+          site_logo_letter?: string;
+          site_tagline?: string | null;
+          site_description?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          site_name?: string;
+          site_logo_url?: string | null;
+          site_logo_letter?: string;
+          site_tagline?: string | null;
+          site_description?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
     };
