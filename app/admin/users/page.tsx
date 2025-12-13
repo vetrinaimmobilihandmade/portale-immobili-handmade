@@ -132,33 +132,50 @@ export default function AdminUsersPage() {
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    // Impedisci auto-downgrade
-    if (userId === currentUserId) {
-      setToast({ type: 'error', message: '❌ Non puoi modificare il tuo ruolo!' });
-      return;
-    }
+  // Impedisci auto-downgrade
+  if (userId === currentUserId) {
+    setToast({ type: 'error', message: '❌ Non puoi modificare il tuo ruolo!' });
+    return;
+  }
 
-    setChangingRoleUserId(userId);
+  setChangingRoleUserId(userId);
 
-    try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ role: newRole })
-        .eq('id', userId);
+  try {
+    // ✅ FIX 1: Update con timestamp per forzare refresh
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ 
+        role: newRole,
+        updated_at: new Date().toISOString() // Forza aggiornamento timestamp
+      })
+      .eq('id', userId);
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // Ricarica utenti
-      await loadUsers();
+    // ✅ FIX 2: Aggiorna immediatamente lo state locale
+    setUsers(prevUsers => 
+      prevUsers.map(u => 
+        u.id === userId ? { ...u, role: newRole, updated_at: new Date().toISOString() } : u
+      )
+    );
 
-      setToast({ type: 'success', message: `✅ Ruolo aggiornato a: ${getRoleLabel(newRole)}` });
-    } catch (err: any) {
-      console.error('Error updating role:', err);
-      setToast({ type: 'error', message: '❌ Errore durante l\'aggiornamento del ruolo' });
-    } finally {
-      setChangingRoleUserId(null);
-    }
-  };
+    // ✅ FIX 3: Ricalcola statistiche
+    const updatedUsers = users.map(u => 
+      u.id === userId ? { ...u, role: newRole } : u
+    );
+    calculateStats(updatedUsers);
+
+    setToast({ type: 'success', message: `✅ Ruolo aggiornato a: ${getRoleLabel(newRole)}` });
+  } catch (err: any) {
+    console.error('Error updating role:', err);
+    setToast({ type: 'error', message: '❌ Errore durante l\'aggiornamento del ruolo' });
+    
+    // ✅ FIX 4: In caso di errore, ricarica dal DB
+    await loadUsers();
+  } finally {
+    setChangingRoleUserId(null);
+  }
+};
 
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
