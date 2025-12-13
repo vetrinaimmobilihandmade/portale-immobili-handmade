@@ -14,6 +14,7 @@ export type Database = {
           bio: string | null;
           is_active: boolean;
           email_verified: boolean;
+          accept_agency_contact: boolean; // 🆕 AGGIUNTO
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export type Database = {
           bio?: string | null;
           is_active?: boolean;
           email_verified?: boolean;
+          accept_agency_contact?: boolean; // 🆕 AGGIUNTO
           created_at?: string;
           updated_at?: string;
         };
@@ -40,6 +42,7 @@ export type Database = {
           bio?: string | null;
           is_active?: boolean;
           email_verified?: boolean;
+          accept_agency_contact?: boolean; // 🆕 AGGIUNTO
           created_at?: string;
           updated_at?: string;
         };
