@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { AlertCircle, CheckCircle, Shield, ExternalLink } from 'lucide-react';
+import { AlertCircle, CheckCircle, Shield, ExternalLink, Briefcase } from 'lucide-react';
 import { isValidEmail, isValidPhone } from '@/lib/utils';
 
 export default function RegisterPage() {
@@ -17,6 +17,7 @@ export default function RegisterPage() {
     phone: '',
     password: '',
     confirmPassword: '',
+    accept_agency_contact: false, // 🆕 NUOVO CAMPO
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
@@ -57,36 +58,15 @@ export default function RegisterPage() {
     setErrors({});
     setSuccess(false);
     try {
-      // Determina l'URL di redirect (usa quello di produzione)
-      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL 
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
-        : `${window.location.origin}/auth/callback`;
-      
-      console.log('🔵 Registrazione con redirect:', redirectUrl);
-      
       const res1 = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: formData.nome + ' ' + formData.cognome,
-            phone: formData.phone,
-          }
-        }
       });
-      
-      console.log('🔵 Risultato signUp:', { 
-        hasUser: !!res1.data.user, 
-        error: res1.error?.message 
-      });
-      
       if (res1.error) {
         setErrors({ general: res1.error.message });
         setLoading(false);
         return;
       }
-      
       if (res1.data.user) {
         const res2 = await supabase.from('user_profiles').insert({
           id: res1.data.user.id,
@@ -94,9 +74,9 @@ export default function RegisterPage() {
           full_name: formData.nome + ' ' + formData.cognome,
           phone: formData.phone,
           role: 'viewer',
+          accept_agency_contact: formData.accept_agency_contact, // 🆕 SALVA IL FLAG
         });
         if (res2.error) {
-          console.error('❌ Errore user_profiles:', res2.error);
           setErrors({ general: 'Errore creazione profilo' });
           setLoading(false);
           return;
@@ -104,14 +84,13 @@ export default function RegisterPage() {
       }
       setSuccess(true);
       setLoading(false);
-    } catch (err: any) {
-      console.error('❌ Errore registrazione:', err);
+    } catch (err) {
       setErrors({ general: 'Errore durante la registrazione' });
       setLoading(false);
     }
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData({ ...formData, [field]: value });
     if (errors[field]) {
       const newErrors = { ...errors };
@@ -185,6 +164,32 @@ export default function RegisterPage() {
                 <Input label="Telefono" type="tel" placeholder="333 123 4567" value={formData.phone} onChange={(e) => handleChange('phone', e.target.value)} error={errors.phone} helperText="Il tuo numero rimarra privato e non sara mai visibile ad altri utenti" required />
                 <Input label="Password" type="password" placeholder="••••••••" value={formData.password} onChange={(e) => handleChange('password', e.target.value)} error={errors.password} helperText="Minimo 8 caratteri" required />
                 <Input label="Conferma Password" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={(e) => handleChange('confirmPassword', e.target.value)} error={errors.confirmPassword} required />
+                
+                {/* 🆕 NUOVO: Checkbox Contatto Agenzia */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="accept_agency_contact"
+                      checked={formData.accept_agency_contact}
+                      onChange={(e) => handleChange('accept_agency_contact', e.target.checked)}
+                      className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="accept_agency_contact" className="font-medium text-text-primary cursor-pointer flex items-center gap-2">
+                        <Briefcase className="w-4 h-4 text-blue-600" />
+                        Contatto Agenzie Immobiliari
+                      </label>
+                      <p className="text-sm text-text-secondary mt-1">
+                        Sono interessato a ricevere supporto da professionisti del settore immobiliare
+                      </p>
+                      <p className="text-xs text-text-secondary mt-2 italic">
+                        ℹ️ Opzionale - Puoi modificare questa preferenza in qualsiasi momento dal tuo profilo
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <Button type="submit" variant="primary" size="lg" fullWidth isLoading={loading}>Registrati</Button>
               </form>
               <div className="mt-6 text-center">
