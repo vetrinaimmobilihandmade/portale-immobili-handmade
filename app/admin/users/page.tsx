@@ -7,12 +7,12 @@ import { useUserRole } from '@/hooks/useUserRole';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
-import { Users, Download, Search, Filter, Calendar, Mail, Phone, Shield, ArrowLeft, Briefcase } from 'lucide-react';
+import { Users, Download, Search, Filter, Calendar, Mail, Phone, Shield, ArrowLeft, Briefcase, CheckCircle, AlertCircle } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
 export default function AdminUsersPage() {
   const router = useRouter();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, userId: currentUserId, loading: roleLoading } = useUserRole();
   const supabase = createClient();
 
   const [users, setUsers] = useState<any[]>([]);
@@ -21,7 +21,9 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [agencyContactFilter, setAgencyContactFilter] = useState<string>('all'); // 🆕 AGGIUNTO
+  const [agencyContactFilter, setAgencyContactFilter] = useState<string>('all');
+  const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Statistiche
   const [stats, setStats] = useState({
@@ -32,7 +34,7 @@ export default function AdminUsersPage() {
     viewer: 0,
     active: 0,
     verified: 0,
-    acceptAgencyContact: 0, // 🆕 AGGIUNTO
+    acceptAgencyContact: 0,
   });
 
   useEffect(() => {
@@ -47,7 +49,15 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     filterUsers();
-  }, [users, searchQuery, roleFilter, statusFilter, agencyContactFilter]); // 🆕 AGGIUNTO
+  }, [users, searchQuery, roleFilter, statusFilter, agencyContactFilter]);
+
+  // Auto-hide toast dopo 5 secondi
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -78,7 +88,7 @@ export default function AdminUsersPage() {
       viewer: userData.filter(u => u.role === 'viewer').length,
       active: userData.filter(u => u.is_active).length,
       verified: userData.filter(u => u.email_verified).length,
-      acceptAgencyContact: userData.filter(u => u.accept_agency_contact).length, // 🆕 AGGIUNTO
+      acceptAgencyContact: userData.filter(u => u.accept_agency_contact).length,
     });
   };
 
@@ -111,7 +121,7 @@ export default function AdminUsersPage() {
       filtered = filtered.filter(user => !user.email_verified);
     }
 
-    // 🆕 NUOVO: Filtro Contatto Agenzia
+    // Filtro Contatto Agenzia
     if (agencyContactFilter === 'yes') {
       filtered = filtered.filter(user => user.accept_agency_contact);
     } else if (agencyContactFilter === 'no') {
@@ -121,38 +131,43 @@ export default function AdminUsersPage() {
     setFilteredUsers(filtered);
   };
 
-  const exportToCSV = () => {
-    // Prepara dati CSV
-    const csvData = filteredUsers.map(user => ({
-      'ID': user.id,
-      'Nome Completo': user.full_name || '',
-      'Email': user.email,
-      'Telefono': user.phone || '',
-      'Ruolo': user.role,
-      'Attivo': user.is_active ? 'Sì' : 'No',
-      'Email Verificata': user.email_verified ? 'Sì' : 'No',
-      'Contatto Agenzia': user.accept_agency_contact ? 'Sì' : 'No', // 🆕 AGGIUNTO
-      'Data Registrazione': formatDate(user.created_at),
-      'Ultimo Aggiornamento': formatDate(user.updated_at),
-    }));
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    // Impedisci auto-downgrade
+    if (userId === currentUserId) {
+      setToast({ type: 'error', message: '❌ Non puoi modificare il tuo ruolo!' });
+      return;
+    }
 
-    // Converti in CSV
-    const headers = Object.keys(csvData[0]).join(',');
-    const rows = csvData.map(row => 
-      Object.values(row).map(val => `"${val}"`).join(',')
-    );
-    const csv = [headers, ...rows].join('\n');
+    setChangingRoleUserId(userId);
 
-    // Download
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `utenti_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      // Ricarica utenti
+      await loadUsers();
+
+      setToast({ type: 'success', message: `✅ Ruolo aggiornato a: ${getRoleLabel(newRole)}` });
+    } catch (err: any) {
+      console.error('Error updating role:', err);
+      setToast({ type: 'error', message: '❌ Errore durante l\'aggiornamento del ruolo' });
+    } finally {
+      setChangingRoleUserId(null);
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      admin: 'Admin',
+      editor: 'Editor',
+      inserzionista: 'Inserzionista',
+      viewer: 'Visualizzatore',
+    };
+    return labels[role] || role;
   };
 
   const getRoleBadge = (role: string) => {
@@ -163,18 +178,42 @@ export default function AdminUsersPage() {
       viewer: 'bg-gray-100 text-gray-800',
     };
 
-    const labels: Record<string, string> = {
-      admin: 'Admin',
-      editor: 'Editor',
-      inserzionista: 'Inserzionista',
-      viewer: 'Visualizzatore',
-    };
-
     return (
       <Badge variant="default" className={colors[role] || ''}>
-        {labels[role] || role}
+        {getRoleLabel(role)}
       </Badge>
     );
+  };
+
+  const exportToCSV = () => {
+    const csvData = filteredUsers.map(user => ({
+      'ID': user.id,
+      'Nome Completo': user.full_name || '',
+      'Email': user.email,
+      'Telefono': user.phone || '',
+      'Ruolo': getRoleLabel(user.role),
+      'Attivo': user.is_active ? 'Sì' : 'No',
+      'Email Verificata': user.email_verified ? 'Sì' : 'No',
+      'Contatto Agenzia': user.accept_agency_contact ? 'Sì' : 'No',
+      'Data Registrazione': formatDate(user.created_at),
+      'Ultimo Aggiornamento': formatDate(user.updated_at),
+    }));
+
+    const headers = Object.keys(csvData[0]).join(',');
+    const rows = csvData.map(row => 
+      Object.values(row).map(val => `"${val}"`).join(',')
+    );
+    const csv = [headers, ...rows].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `utenti_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (roleLoading || loading) {
@@ -189,6 +228,24 @@ export default function AdminUsersPage() {
     <div className="min-h-screen bg-neutral-main py-8 px-4">
       <div className="max-w-7xl mx-auto">
         
+        {/* Toast Notification */}
+        {toast && (
+          <div className={`fixed top-4 right-4 z-50 animate-fade-in ${
+            toast.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+          } border rounded-lg p-4 shadow-lg flex items-center gap-3 max-w-md`}>
+            {toast.type === 'success' ? (
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            )}
+            <p className={`text-sm font-medium ${
+              toast.type === 'success' ? 'text-green-800' : 'text-red-800'
+            }`}>
+              {toast.message}
+            </p>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-6">
           <Button
@@ -242,7 +299,6 @@ export default function AdminUsersPage() {
             <p className="text-sm text-text-secondary mb-1">Inserzionisti</p>
             <p className="text-2xl font-bold text-primary">{stats.inserzionista}</p>
           </div>
-          {/* 🆕 NUOVO: Stat Card Contatto Agenzia */}
           <div className="bg-white rounded-lg border border-neutral-border p-4">
             <p className="text-sm text-text-secondary mb-1">Contatto Agenzia</p>
             <p className="text-2xl font-bold text-orange-600">{stats.acceptAgencyContact}</p>
@@ -291,7 +347,6 @@ export default function AdminUsersPage() {
               </select>
             </div>
 
-            {/* 🆕 NUOVO: Filtro Contatto Agenzia */}
             <div>
               <select
                 value={agencyContactFilter}
@@ -324,7 +379,6 @@ export default function AdminUsersPage() {
                   <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
                     Stato
                   </th>
-                  {/* 🆕 NUOVA: Colonna Contatto Agenzia */}
                   <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">
                     Agenzia
                   </th>
@@ -376,7 +430,32 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {getRoleBadge(user.role)}
+                        {/* 🆕 DROPDOWN CAMBIO RUOLO */}
+                        {user.id === currentUserId ? (
+                          // Admin corrente: mostra solo badge (non modificabile)
+                          <div className="flex items-center gap-2">
+                            {getRoleBadge(user.role)}
+                            <span className="text-xs text-text-secondary">(Tu)</span>
+                          </div>
+                        ) : (
+                          // Altri utenti: dropdown modificabile
+                          <select
+                            value={user.role}
+                            onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                            disabled={changingRoleUserId === user.id}
+                            className="px-3 py-2 border border-neutral-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <option value="admin">Admin</option>
+                            <option value="editor">Editor</option>
+                            <option value="inserzionista">Inserzionista</option>
+                            <option value="viewer">Visualizzatore</option>
+                          </select>
+                        )}
+                        {changingRoleUserId === user.id && (
+                          <div className="mt-1">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1">
@@ -393,7 +472,6 @@ export default function AdminUsersPage() {
                           )}
                         </div>
                       </td>
-                      {/* 🆕 NUOVA: Colonna Contatto Agenzia */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Briefcase className={`w-4 h-4 ${user.accept_agency_contact ? 'text-orange-600' : 'text-gray-400'}`} />
