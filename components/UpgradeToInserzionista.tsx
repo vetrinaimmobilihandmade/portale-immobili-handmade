@@ -118,11 +118,6 @@ export default function UpgradeToInserzionista({ userId, onSuccess, onCancel }: 
             Conferma
           </Button>
         </div>
-
-        {/* Note */}
-        <p className="text-xs text-text-secondary text-center mt-4">
-          Potrai sempre tornare a visualizzatore dalle impostazioni
-        </p>
       </div>
     </div>
   );
