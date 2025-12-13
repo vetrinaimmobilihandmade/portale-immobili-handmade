@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
-import { User, Mail, Phone, FileText, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Mail, Phone, FileText, Save, AlertCircle, CheckCircle, Briefcase } from 'lucide-react';
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,7 @@ export default function ProfilePage() {
     email: '',
     phone: '',
     bio: '',
+    accept_agency_contact: false, // 🆕 AGGIUNTO
   });
 
   const supabase = createClient();
@@ -52,6 +53,7 @@ export default function ProfilePage() {
           email: profile.email || '',
           phone: profile.phone || '',
           bio: profile.bio || '',
+          accept_agency_contact: profile.accept_agency_contact || false, // 🆕 AGGIUNTO
         });
       }
     } catch (err: any) {
@@ -82,6 +84,7 @@ export default function ProfilePage() {
           full_name: formData.full_name,
           phone: formData.phone,
           bio: formData.bio,
+          accept_agency_contact: formData.accept_agency_contact, // 🆕 AGGIUNTO
         })
         .eq('id', user.id);
 
@@ -101,7 +104,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -212,6 +215,28 @@ export default function ProfilePage() {
                 <p className="text-xs text-text-secondary mt-1">
                   Massimo 500 caratteri
                 </p>
+              </div>
+
+              {/* 🆕 NUOVO: Checkbox Contatto Agenzia */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="accept_agency_contact"
+                    checked={formData.accept_agency_contact}
+                    onChange={(e) => handleChange('accept_agency_contact', e.target.checked)}
+                    className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <div className="flex-1">
+                    <label htmlFor="accept_agency_contact" className="font-medium text-text-primary cursor-pointer flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-blue-600" />
+                      Contatto Agenzie Immobiliari
+                    </label>
+                    <p className="text-sm text-text-secondary mt-1">
+                      Sono interessato a ricevere supporto da professionisti del settore immobiliare
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Buttons */}
