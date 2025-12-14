@@ -9,7 +9,6 @@ export default function Footer() {
   const [siteSettings, setSiteSettings] = useState<any>(null);
   const supabase = createClient();
 
-  // 🆕 CARICA IMPOSTAZIONI SITO
   useEffect(() => {
     loadSiteSettings();
   }, []);
@@ -27,7 +26,6 @@ export default function Footer() {
     <footer className="bg-neutral-main border-t border-neutral-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        {/* 🆕 Logo e Slogan DINAMICI */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             {siteSettings?.site_logo_url ? (
@@ -52,10 +50,8 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Link Columns */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           
-          {/* Colonna 1 */}
           <div>
             <h3 className="font-semibold text-text-primary mb-4">Il Portale</h3>
             <ul className="space-y-3">
@@ -77,7 +73,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonna 2 */}
           <div>
             <h3 className="font-semibold text-text-primary mb-4">Supporto</h3>
             <ul className="space-y-3">
@@ -99,7 +94,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonna 3 */}
           <div>
             <h3 className="font-semibold text-text-primary mb-4">Legale</h3>
             <ul className="space-y-3">
@@ -121,7 +115,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonna 4 - Seguici */}
           <div>
             <h3 className="font-semibold text-text-primary mb-4">Seguici</h3>
             <ul className="space-y-3">
@@ -139,7 +132,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Sezione Donazioni Ko-fi */}
         <div className="mb-8">
           <div className="bg-secondary-lighter border border-secondary-light rounded-lg p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -161,7 +153,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="pt-8 border-t border-neutral-border">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-secondary">
             <p>© 2025 {siteSettings?.site_name || 'Portale'}. Tutti i diritti riservati.</p>
