@@ -83,11 +83,11 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                 <img 
                   src={siteSettings.site_logo_url} 
                   alt={siteSettings.site_name || 'Logo'}
-                  className="w-10 h-10 rounded-lg object-cover"
+                  className="w-16 h-16 rounded-lg object-cover"
                 />
               ) : (
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">
+                <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">
                     {siteSettings?.site_logo_letter || 'P'}
                   </span>
                 </div>
@@ -252,7 +252,7 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                           <span className="text-text-primary">Dashboard</span>
                         </Link>
                         
-                        {/* 🆕 MENU ADMIN - VISIBILE SOLO AD ADMIN/EDITOR */}
+                        {/* MENU ADMIN - VISIBILE SOLO AD ADMIN/EDITOR */}
                         {(initialProfile?.role === 'admin' || initialProfile?.role === 'editor') && (
                           <>
                             <div className="my-2 border-t border-neutral-border"></div>
@@ -271,7 +271,7 @@ export default function HeaderClient({ user: initialUser, profile: initialProfil
                               <span className="text-text-primary">Moderazione</span>
                             </Link>
 
-                            {/* 🆕 LINK GESTIONE UTENTI - SOLO ADMIN */}
+                            {/* LINK GESTIONE UTENTI - SOLO ADMIN */}
                             {initialProfile?.role === 'admin' && (
                               <Link
                                 href="/admin/users"
