@@ -126,15 +126,15 @@ export default function Footer() {
             <h3 className="font-semibold text-text-primary mb-4">Seguici</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-text-secondary hover:text-primary transition-colors">
-                  Facebook
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-sm text-text-secondary hover:text-primary transition-colors">
-                  Instagram
-                </a>
-              </li>
+  <a href="https://www.facebook.com/profile.php?id=61584995855686" target="_blank" rel="noopener noreferrer" className="text-sm text-text-secondary hover:text-primary transition-colors">
+    Facebook
+  </a>
+</li>
+<li>
+  <a href="https://www.instagram.com/hmstudioit/" target="_blank" rel="noopener noreferrer" className="text-sm text-text-secondary hover:text-primary transition-colors">
+    Instagram
+  </a>
+</li>
             </ul>
           </div>
         </div>
