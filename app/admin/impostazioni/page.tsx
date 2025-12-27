@@ -41,12 +41,12 @@ export default function AdminSettingsPage() {
 
   const loadSettings = async () => {
     try {
-      const { data, error }: { data: any; error: any } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('site_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (fetchError) throw fetchError;
 
       if (data) {
         setFormData({
@@ -87,18 +87,8 @@ export default function AdminSettingsPage() {
     setSuccess(false);
 
     try {
-      // ✅ FIX: Tipizzazione esplicita per evitare errore TypeScript
-      const updateData: {
-        site_name: string;
-        site_logo_url: string | null;
-        site_logo_letter: string;
-        site_tagline: string | null;
-        site_description: string | null;
-        contact_email: string | null;
-        contact_phone: string | null;
-        updated_by: string | null;
-        updated_at: string;
-      } = {
+      // ✅ SOLUZIONE: Definiamo il payload con tipo esplicito
+      const payload: Record<string, any> = {
         site_name: formData.site_name,
         site_logo_url: logoUrls[0] || null,
         site_logo_letter: formData.site_logo_letter || formData.site_name.charAt(0).toUpperCase(),
@@ -110,22 +100,25 @@ export default function AdminSettingsPage() {
         updated_at: new Date().toISOString(),
       };
 
+      // Verifica se esiste già un record
       const { data: existing } = await supabase
         .from('site_settings')
         .select('id')
-        .single();
+        .maybeSingle();
 
       if (existing) {
+        // Update esistente
         const { error: updateError } = await supabase
           .from('site_settings')
-          .update(updateData)
+          .update(payload)
           .eq('id', existing.id);
 
         if (updateError) throw updateError;
       } else {
+        // Insert nuovo
         const { error: insertError } = await supabase
           .from('site_settings')
-          .insert(updateData);
+          .insert([payload]);
 
         if (insertError) throw insertError;
       }
