@@ -87,7 +87,18 @@ export default function AdminSettingsPage() {
     setSuccess(false);
 
     try {
-      const updateData: any = {
+      // ✅ FIX: Tipizzazione esplicita per evitare errore TypeScript
+      const updateData: {
+        site_name: string;
+        site_logo_url: string | null;
+        site_logo_letter: string;
+        site_tagline: string | null;
+        site_description: string | null;
+        contact_email: string | null;
+        contact_phone: string | null;
+        updated_by: string | null;
+        updated_at: string;
+      } = {
         site_name: formData.site_name,
         site_logo_url: logoUrls[0] || null,
         site_logo_letter: formData.site_logo_letter || formData.site_name.charAt(0).toUpperCase(),
