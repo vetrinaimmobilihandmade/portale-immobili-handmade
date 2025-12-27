@@ -41,7 +41,7 @@ export default function AdminSettingsPage() {
 
   const loadSettings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error }: { data: any; error: any } = await supabase
         .from('site_settings')
         .select('*')
         .single();
