@@ -106,6 +106,7 @@ export default function AdminEditPropertyPage() {
 
   const loadProperty = async () => {
     try {
+      // ✅ FIX: Cast esplicito del tipo di ritorno
       const { data, error: fetchError } = await supabase
         .from('properties')
         .select(`
@@ -113,7 +114,7 @@ export default function AdminEditPropertyPage() {
           property_images (thumbnail_url, full_url, display_order)
         `)
         .eq('id', params.id)
-        .single();
+        .single() as { data: any; error: any };
 
       if (fetchError) throw fetchError;
 
