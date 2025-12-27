@@ -106,7 +106,7 @@ export default function EditPropertyPage() {
       }
       setUserId(user.id);
 
-      // Carica immobile
+      // ✅ FIX: Cast esplicito del tipo di ritorno
       const { data, error: fetchError } = await supabase
         .from('properties')
         .select(`
@@ -114,7 +114,7 @@ export default function EditPropertyPage() {
           property_images (thumbnail_url, full_url, display_order)
         `)
         .eq('id', params.id)
-        .single();
+        .single() as { data: any; error: any };
 
       if (fetchError) throw fetchError;
 
@@ -192,7 +192,7 @@ export default function EditPropertyPage() {
     if (!formData.province_id) newErrors.province_id = 'Seleziona una provincia';
     
     if (!formData.municipality_name.trim()) newErrors.municipality_name = 'Comune richiesto';
-    
+
     if (imageUrls.length === 0) {
       newErrors.images = 'Devi caricare almeno 5 foto dell\'immobile';
     } else if (imageUrls.length < 5) {
@@ -243,7 +243,7 @@ export default function EditPropertyPage() {
 
       if (updateError) throw updateError;
 
-      // Aggiorna immagini
+      // Aggiorna immagini (elimina vecchie e inserisci nuove)
       await supabase
         .from('property_images')
         .delete()
@@ -296,7 +296,7 @@ export default function EditPropertyPage() {
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
           <h2 className="text-2xl font-bold text-text-primary mb-2">
-            Annuncio Aggiornato!
+            Immobile Aggiornato!
           </h2>
           <p className="text-text-secondary mb-4">
             Le modifiche sono state salvate. L'annuncio è tornato in attesa di approvazione.
