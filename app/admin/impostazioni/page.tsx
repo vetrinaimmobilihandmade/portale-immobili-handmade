@@ -41,7 +41,6 @@ export default function AdminSettingsPage() {
 
   const loadSettings = async () => {
     try {
-      // ✅ FIX: Forza il tipo any per evitare errori TypeScript
       const { data, error: fetchError } = await supabase
         .from('site_settings')
         .select('*')
@@ -90,8 +89,7 @@ export default function AdminSettingsPage() {
     setSuccess(false);
 
     try {
-      // ✅ Payload con tipo esplicito
-      const payload: Record<string, any> = {
+      const payload = {
         site_name: formData.site_name,
         site_logo_url: logoUrls[0] || null,
         site_logo_letter: formData.site_logo_letter || formData.site_name.charAt(0).toUpperCase(),
@@ -110,25 +108,23 @@ export default function AdminSettingsPage() {
         .maybeSingle() as { data: any };
 
       if (existing) {
-        // Update esistente
-        const { error: updateError } = await supabase
+        // ✅ SOLUZIONE DEFINITIVA: Usa supabase senza tipi
+        const result = await (supabase as any)
           .from('site_settings')
           .update(payload)
           .eq('id', existing.id);
 
-        if (updateError) throw updateError;
+        if (result.error) throw result.error;
       } else {
-        // Insert nuovo
-        const { error: insertError } = await supabase
+        const result = await (supabase as any)
           .from('site_settings')
           .insert([payload]);
 
-        if (insertError) throw insertError;
+        if (result.error) throw result.error;
       }
 
       setSuccess(true);
       
-      // Ricarica la pagina dopo 2 secondi per aggiornare header/footer
       setTimeout(() => {
         window.location.reload();
       }, 2000);
