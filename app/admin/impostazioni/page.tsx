@@ -87,7 +87,7 @@ export default function AdminSettingsPage() {
     setSuccess(false);
 
     try {
-      const updateData = {
+      const updateData: any = {
         site_name: formData.site_name,
         site_logo_url: logoUrls[0] || null,
         site_logo_letter: formData.site_logo_letter || formData.site_name.charAt(0).toUpperCase(),
