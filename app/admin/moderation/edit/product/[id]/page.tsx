@@ -62,6 +62,7 @@ export default function AdminEditProductPage() {
 
   const loadProduct = async () => {
     try {
+      // ✅ FIX: Cast esplicito del tipo di ritorno
       const { data, error: fetchError } = await supabase
         .from('products')
         .select(`
@@ -69,7 +70,7 @@ export default function AdminEditProductPage() {
           product_images (thumbnail_url, full_url, display_order)
         `)
         .eq('id', params.id)
-        .single();
+        .single() as { data: any; error: any };
 
       if (fetchError) throw fetchError;
 
