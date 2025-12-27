@@ -41,12 +41,15 @@ export default function AdminSettingsPage() {
 
   const loadSettings = async () => {
     try {
+      // ✅ FIX: Forza il tipo any per evitare errori TypeScript
       const { data, error: fetchError } = await supabase
         .from('site_settings')
         .select('*')
-        .maybeSingle();
+        .maybeSingle() as { data: any; error: any };
 
-      if (fetchError) throw fetchError;
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
 
       if (data) {
         setFormData({
@@ -87,7 +90,7 @@ export default function AdminSettingsPage() {
     setSuccess(false);
 
     try {
-      // ✅ SOLUZIONE: Definiamo il payload con tipo esplicito
+      // ✅ Payload con tipo esplicito
       const payload: Record<string, any> = {
         site_name: formData.site_name,
         site_logo_url: logoUrls[0] || null,
@@ -104,7 +107,7 @@ export default function AdminSettingsPage() {
       const { data: existing } = await supabase
         .from('site_settings')
         .select('id')
-        .maybeSingle();
+        .maybeSingle() as { data: any };
 
       if (existing) {
         // Update esistente
